@@ -8,8 +8,13 @@ import (
 	"project-root/routes"
 
 	"github.com/gin-gonic/gin"
+
+	_ "project-root/docs"
 )
 
+// @title					Go, Gin, and Postgre Base Project
+// @version				1.0
+// @description 	Go, Gin, and Postgre Base Project
 func main() {
 	config.InitEnv()
 
