@@ -11,7 +11,6 @@ import (
 	ginSwagger "github.com/swaggo/gin-swagger"
 )
 
-// @BasePath		/api/v1
 func InitRoutes(r *gin.Engine, p *providers.Providers) {
 	api := r.Group("api/v1")
 

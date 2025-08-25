@@ -15,6 +15,7 @@ import (
 // @title					Go, Gin, and Postgre Base Project
 // @version				1.0
 // @description 	Go, Gin, and Postgre Base Project
+// @BasePath			/api/v1
 func main() {
 	config.InitEnv()
 
