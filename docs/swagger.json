@@ -6,5 +6,103 @@
         "contact": {},
         "version": "1.0"
     },
-    "paths": {}
+    "basePath": "/api/v1",
+    "paths": {
+        "/examples": {
+            "get": {
+                "description": "get all example data",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "examples"
+                ],
+                "summary": "Get Example",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/common.BaseResponse-dto_ExampleDTO"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "create an example",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "examples"
+                ],
+                "summary": "Post Example",
+                "parameters": [
+                    {
+                        "description": "request body for create an example [RAW]",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.CreateExample"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/common.BaseResponse-dto_ExampleDTO"
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "common.BaseResponse-dto_ExampleDTO": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "$ref": "#/definitions/dto.ExampleDTO"
+                },
+                "message": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "integer"
+                }
+            }
+        },
+        "dto.CreateExample": {
+            "type": "object",
+            "required": [
+                "name"
+            ],
+            "properties": {
+                "name": {
+                    "type": "string",
+                    "example": "Bakwan Jagung"
+                }
+            }
+        },
+        "dto.ExampleDTO": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "string",
+                    "example": "a53515e3-5a7f-440b-82f6-3d84ac7ce746"
+                },
+                "name": {
+                    "type": "string",
+                    "example": "Bakwan Jagung"
+                }
+            }
+        }
+    }
 }

@@ -1,7 +1,71 @@
+basePath: /api/v1
+definitions:
+  common.BaseResponse-dto_ExampleDTO:
+    properties:
+      data:
+        $ref: '#/definitions/dto.ExampleDTO'
+      message:
+        type: string
+      status:
+        type: integer
+    type: object
+  dto.CreateExample:
+    properties:
+      name:
+        example: Bakwan Jagung
+        type: string
+    required:
+    - name
+    type: object
+  dto.ExampleDTO:
+    properties:
+      id:
+        example: a53515e3-5a7f-440b-82f6-3d84ac7ce746
+        type: string
+      name:
+        example: Bakwan Jagung
+        type: string
+    type: object
 info:
   contact: {}
   description: Go, Gin, and Postgre Base Project
   title: Go, Gin, and Postgre Base Project
   version: "1.0"
-paths: {}
+paths:
+  /examples:
+    get:
+      consumes:
+      - application/json
+      description: get all example data
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/common.BaseResponse-dto_ExampleDTO'
+      summary: Get Example
+      tags:
+      - examples
+    post:
+      consumes:
+      - application/json
+      description: create an example
+      parameters:
+      - description: request body for create an example [RAW]
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.CreateExample'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/common.BaseResponse-dto_ExampleDTO'
+      summary: Post Example
+      tags:
+      - examples
 swagger: "2.0"
