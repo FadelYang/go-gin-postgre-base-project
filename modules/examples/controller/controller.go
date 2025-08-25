@@ -20,6 +20,13 @@ func NewExampleController(example service.ExampleService) *ExampleController {
 	}
 }
 
+// @Tags 					examples
+// @Summary				Get Example
+// @Description 	get all example data
+// @Accept 				json
+// @Produce 			json
+// @Success				200 {object} common.BaseResponse[dto.ExampleDTO]
+// @Router				/examples [get]
 func (c *ExampleController) GetExamples(ctx *gin.Context) {
 	examples, err := c.exampleService.GetExamples()
 	if err != nil {
@@ -27,10 +34,10 @@ func (c *ExampleController) GetExamples(ctx *gin.Context) {
 
 		ctx.JSON(
 			http.StatusInternalServerError,
-			common.BaseResponse{
+			common.BaseResponse[dto.ExampleDTO]{
 				Status:  http.StatusInternalServerError,
 				Message: "Failed to get examples",
-				Data:    nil,
+				Data:    dto.ExampleDTO{},
 			},
 		)
 		return
@@ -38,7 +45,7 @@ func (c *ExampleController) GetExamples(ctx *gin.Context) {
 
 	ctx.JSON(
 		http.StatusOK,
-		common.BaseResponse{
+		common.BaseResponse[[]dto.ExampleDTO]{
 			Status:  http.StatusOK,
 			Message: "Success get examples",
 			Data:    examples,
@@ -46,6 +53,14 @@ func (c *ExampleController) GetExamples(ctx *gin.Context) {
 	)
 }
 
+// @Tags 					examples
+// @Summary				Post Example
+// @Description 	create an example
+// @Accept 				json
+// @Produce 			json
+// @Success				201 {object} common.BaseResponse[dto.ExampleDTO]
+// @Router				/examples [post]
+// @Param					request body dto.CreateExample true "request body for create an example [RAW]"
 func (c *ExampleController) Create(ctx *gin.Context) {
 	var example dto.ExampleDTO
 	if err := ctx.ShouldBindBodyWithJSON(&example); err != nil {
@@ -53,10 +68,10 @@ func (c *ExampleController) Create(ctx *gin.Context) {
 
 		ctx.JSON(
 			http.StatusInternalServerError,
-			common.BaseResponse{
+			common.BaseResponse[dto.ExampleDTO]{
 				Status:  http.StatusInternalServerError,
 				Message: "Failed to create an example",
-				Data:    nil,
+				Data:    dto.ExampleDTO{},
 			},
 		)
 		return
@@ -68,10 +83,10 @@ func (c *ExampleController) Create(ctx *gin.Context) {
 
 		ctx.JSON(
 			http.StatusInternalServerError,
-			common.BaseResponse{
+			common.BaseResponse[dto.ExampleDTO]{
 				Status:  http.StatusInternalServerError,
 				Message: "Failed to create an example",
-				Data:    nil,
+				Data:    dto.ExampleDTO{},
 			},
 		)
 		return
@@ -79,7 +94,7 @@ func (c *ExampleController) Create(ctx *gin.Context) {
 
 	ctx.JSON(
 		http.StatusOK,
-		common.BaseResponse{
+		common.BaseResponse[dto.ExampleDTO]{
 			Status:  http.StatusInternalServerError,
 			Message: "Success create an example",
 			Data:    createdExample,
