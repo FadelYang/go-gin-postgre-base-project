@@ -1,7 +1,10 @@
 {
     "swagger": "2.0",
     "info": {
-        "contact": {}
+        "description": "Go, Gin, and Postgre Base Project",
+        "title": "Go, Gin, and Postgre Base Project",
+        "contact": {},
+        "version": "1.0"
     },
     "paths": {}
 }

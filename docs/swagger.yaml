@@ -1,4 +1,7 @@
 info:
   contact: {}
+  description: Go, Gin, and Postgre Base Project
+  title: Go, Gin, and Postgre Base Project
+  version: "1.0"
 paths: {}
 swagger: "2.0"
