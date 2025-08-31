@@ -9,6 +9,15 @@ definitions:
       status:
         type: integer
     type: object
+  common.BaseResponse-dto_UserDTO:
+    properties:
+      data:
+        $ref: '#/definitions/dto.UserDTO'
+      message:
+        type: string
+      status:
+        type: integer
+    type: object
   dto.CreateExample:
     properties:
       name:
@@ -17,6 +26,18 @@ definitions:
     required:
     - name
     type: object
+  dto.CreateUser:
+    properties:
+      email:
+        example: budipambudi@gmail.com
+        type: string
+      password:
+        example: supersecretpassword
+        type: string
+      username:
+        example: Budi Pambudi
+        type: string
+    type: object
   dto.ExampleDTO:
     properties:
       id:
@@ -24,6 +45,33 @@ definitions:
         type: string
       name:
         example: Bakwan Jagung
+        type: string
+    type: object
+  dto.UpdateUser:
+    properties:
+      email:
+        example: budipambudi@gmail.com
+        type: string
+      username:
+        example: Budi Pambudi
+        type: string
+    type: object
+  dto.UserDTO:
+    properties:
+      created_at:
+        example: "1617181723"
+        type: string
+      email:
+        example: budipambudi@gmail.com
+        type: string
+      id:
+        example: a53515e3-5a7f-440b-82f6-3d84ac7ce746
+        type: string
+      updated_at:
+        example: "1617181723"
+        type: string
+      username:
+        example: Budi Pambudi
         type: string
     type: object
 info:
@@ -68,4 +116,128 @@ paths:
       summary: Post Example
       tags:
       - examples
+  /users:
+    get:
+      consumes:
+      - application/json
+      description: get all users
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/common.BaseResponse-dto_UserDTO'
+      summary: Get Users
+      tags:
+      - users
+    post:
+      consumes:
+      - application/json
+      description: create an user
+      parameters:
+      - description: request body for create an user [RAW]
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.CreateUser'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/common.BaseResponse-dto_UserDTO'
+      summary: Create User
+      tags:
+      - users
+  /users/{uuid}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete an user
+      parameters:
+      - description: UUID
+        in: path
+        name: uuid
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/common.BaseResponse-dto_UserDTO'
+      summary: Delete User
+      tags:
+      - users
+    get:
+      consumes:
+      - application/json
+      description: Find user by id
+      parameters:
+      - description: UUID
+        in: path
+        name: uuid
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/common.BaseResponse-dto_UserDTO'
+      summary: Find User By Its UUID
+      tags:
+      - users
+    put:
+      consumes:
+      - application/json
+      description: update an user
+      parameters:
+      - description: UUID
+        in: path
+        name: uuid
+        required: true
+        type: string
+      - description: request body for update an example [RAW]
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.UpdateUser'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/common.BaseResponse-dto_UserDTO'
+      summary: Update User
+      tags:
+      - users
+  /users/email/{email}:
+    get:
+      consumes:
+      - application/json
+      description: Find user by email
+      parameters:
+      - description: User Email
+        in: path
+        name: email
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/common.BaseResponse-dto_UserDTO'
+      summary: Find User By Its Email
+      tags:
+      - users
 swagger: "2.0"
