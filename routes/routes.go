@@ -6,6 +6,7 @@ import (
 	"github.com/gin-gonic/gin"
 
 	ex "project-root/modules/examples/routes"
+	users "project-root/modules/users/routes"
 
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
@@ -14,7 +15,8 @@ import (
 func InitRoutes(r *gin.Engine, p *providers.Providers) {
 	api := r.Group("api/v1")
 
-	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
+	api.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
 	ex.RegisterRoutes(api, p.Examples)
+	users.RegisterRoutes(api, p.Users)
 }
