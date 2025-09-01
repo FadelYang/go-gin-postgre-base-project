@@ -1,12 +1,25 @@
 package service
 
 import (
+	"errors"
+	"fmt"
 	"project-root/modules/users/dto"
 	"project-root/modules/users/model"
 	"project-root/modules/users/repository"
 	"project-root/tools"
 
 	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5/pgconn"
+	"gorm.io/gorm"
+)
+
+var (
+	ErrUserNotFound       = errors.New("user not found")
+	ErrCreateUserValidate = errors.New("failed to create a user")
+	ErrUpdateUserVaildate = errors.New("failed to update a user")
+	ErrDeleteUuser        = errors.New("failed to delete a user")
+	ErrDuplicateUserEmail = errors.New("user with that email is already exists")
+	ErrDuplicateUsername  = errors.New("user with that username is already exists")
 )
 
 type UserService interface {
@@ -31,12 +44,13 @@ func NewUserService(userRepo repository.UserRepository) UserService {
 func (s *userService) GetAll() ([]dto.UserDTO, error) {
 	users, err := s.userRepo.FindAll()
 	if err != nil {
-		return []dto.UserDTO{}, err
+		return nil, err
 	}
 
 	result := make([]dto.UserDTO, 0, len(users))
 	for _, i := range users {
 		result = append(result, dto.UserDTO{
+			UUID:      i.ID,
 			Username:  i.Username,
 			Email:     i.Email,
 			CreatedAt: i.CreatedAt,
@@ -61,6 +75,19 @@ func (s *userService) Create(form dto.CreateUser) (dto.UserDTO, error) {
 
 	createdUser, err := s.userRepo.Create(userForm)
 	if err != nil {
+		fmt.Println("created user", err)
+
+		var pgErr *pgconn.PgError
+		if errors.As(err, &pgErr) && pgErr != nil {
+			switch pgErr.ConstraintName {
+			case "users_email_key":
+				return dto.UserDTO{}, ErrDuplicateUserEmail
+			case "users_username_key":
+				return dto.UserDTO{}, ErrDuplicateUsername
+			default:
+				return dto.UserDTO{}, err
+			}
+		}
 		return dto.UserDTO{}, err
 	}
 
@@ -84,6 +111,19 @@ func (s *userService) Update(user dto.UpdateUser, userID uuid.UUID) (dto.UserDTO
 
 	updatedData, err := s.userRepo.Update(existData)
 	if err != nil {
+		fmt.Println("created user", err)
+
+		var pgErr *pgconn.PgError
+		if errors.As(err, &pgErr) && pgErr != nil {
+			switch pgErr.ConstraintName {
+			case "users_email_key":
+				return dto.UserDTO{}, ErrDuplicateUserEmail
+			case "users_username_key":
+				return dto.UserDTO{}, ErrDuplicateUsername
+			default:
+				return dto.UserDTO{}, err
+			}
+		}
 		return dto.UserDTO{}, err
 	}
 
@@ -99,7 +139,11 @@ func (s *userService) Update(user dto.UpdateUser, userID uuid.UUID) (dto.UserDTO
 func (s *userService) Delete(id uuid.UUID) (dto.UserDTO, error) {
 	userToDelete, err := s.FindByID(id)
 	if err != nil {
-		return dto.UserDTO{}, err
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return dto.UserDTO{}, ErrUserNotFound
+		} else {
+			return dto.UserDTO{}, err
+		}
 	}
 
 	if err := s.userRepo.Delete(userToDelete.UUID); err != nil {
@@ -112,7 +156,11 @@ func (s *userService) Delete(id uuid.UUID) (dto.UserDTO, error) {
 func (s *userService) FindByID(id uuid.UUID) (dto.UserDTO, error) {
 	user, err := s.userRepo.FindByID(id)
 	if err != nil {
-		return dto.UserDTO{}, err
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return dto.UserDTO{}, ErrUserNotFound
+		} else {
+			return dto.UserDTO{}, err
+		}
 	}
 
 	return dto.UserDTO{
@@ -127,7 +175,11 @@ func (s *userService) FindByID(id uuid.UUID) (dto.UserDTO, error) {
 func (s *userService) FindByEmail(email string) (dto.UserDTO, error) {
 	user, err := s.userRepo.FindByEmail(email)
 	if err != nil {
-		return dto.UserDTO{}, err
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return dto.UserDTO{}, ErrUserNotFound
+		} else {
+			return dto.UserDTO{}, err
+		}
 	}
 
 	return dto.UserDTO{
