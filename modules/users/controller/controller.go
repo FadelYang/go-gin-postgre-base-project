@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"errors"
 	"fmt"
 	"log"
 	"net/http"
@@ -69,6 +70,12 @@ func (c *UserController) Create(ctx *gin.Context) {
 	if err != nil {
 		log.Printf("Failed to create user: %v", err)
 
+		var vErr *tools.ValidationError
+		if errors.As(err, &vErr) {
+			ctx.JSON(http.StatusConflict, vErr)
+			return
+		}
+
 		ctx.JSON(http.StatusBadRequest, gin.H{"errors": fmt.Sprintf("%s: %s", service.ErrCreateUserValidate, err.Error())})
 		return
 	}
@@ -113,6 +120,12 @@ func (c *UserController) Update(ctx *gin.Context) {
 	updatedUser, err := c.userService.Update(user, parsedUUID)
 	if err != nil {
 		log.Printf("Failed to update user: %v", err)
+
+		var vErr *tools.ValidationError
+		if errors.As(err, &vErr) {
+			ctx.JSON(http.StatusConflict, vErr)
+			return
+		}
 
 		ctx.JSON(http.StatusInternalServerError, gin.H{"errors": err.Error()})
 		return
