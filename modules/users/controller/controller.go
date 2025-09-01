@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"errors"
 	"fmt"
 	"log"
 	"net/http"
@@ -34,14 +35,7 @@ func (c *UserController) GetAll(ctx *gin.Context) {
 	if err != nil {
 		log.Printf("Failed to get users: %v", err)
 
-		ctx.JSON(
-			http.StatusInternalServerError,
-			common.BaseResponse[dto.UserDTO]{
-				Status:  http.StatusInternalServerError,
-				Message: "Failed to get users",
-				Data:    dto.UserDTO{},
-			},
-		)
+		ctx.JSON(http.StatusBadRequest, gin.H{"errors": "failed to get users data"})
 		return
 	}
 
@@ -68,14 +62,7 @@ func (c *UserController) Create(ctx *gin.Context) {
 	if err := ctx.ShouldBindBodyWithJSON(&user); err != nil {
 		log.Printf("Failed to create user: %v", err)
 
-		ctx.JSON(
-			http.StatusInternalServerError,
-			common.BaseResponse[dto.UserDTO]{
-				Status:  http.StatusInternalServerError,
-				Message: "Failed to create user",
-				Data:    dto.UserDTO{},
-			},
-		)
+		ctx.JSON(http.StatusBadRequest, gin.H{"errors": fmt.Sprintf("%s: %s", service.ErrCreateUserValidate, err.Error())})
 		return
 	}
 
@@ -83,14 +70,13 @@ func (c *UserController) Create(ctx *gin.Context) {
 	if err != nil {
 		log.Printf("Failed to create user: %v", err)
 
-		ctx.JSON(
-			http.StatusInternalServerError,
-			common.BaseResponse[dto.UserDTO]{
-				Status:  http.StatusInternalServerError,
-				Message: "Failed to create user",
-				Data:    dto.UserDTO{},
-			},
-		)
+		var vErr *tools.ValidationError
+		if errors.As(err, &vErr) {
+			ctx.JSON(http.StatusConflict, vErr)
+			return
+		}
+
+		ctx.JSON(http.StatusBadRequest, gin.H{"errors": fmt.Sprintf("%s: %s", service.ErrCreateUserValidate, err.Error())})
 		return
 	}
 
@@ -119,14 +105,7 @@ func (c *UserController) Update(ctx *gin.Context) {
 	if err != nil {
 		log.Printf("Failed to update user: %v", err)
 
-		ctx.JSON(
-			http.StatusInternalServerError,
-			common.BaseResponse[dto.UserDTO]{
-				Status:  http.StatusInternalServerError,
-				Message: "Failed to update user",
-				Data:    dto.UserDTO{},
-			},
-		)
+		ctx.JSON(http.StatusBadRequest, gin.H{"errors": fmt.Sprintf("failed to update a user: %s", err.Error())})
 		return
 	}
 
@@ -134,14 +113,7 @@ func (c *UserController) Update(ctx *gin.Context) {
 	if err := ctx.ShouldBindBodyWithJSON(&user); err != nil {
 		log.Printf("Failed to update user: %v", err)
 
-		ctx.JSON(
-			http.StatusInternalServerError,
-			common.BaseResponse[dto.UserDTO]{
-				Status:  http.StatusInternalServerError,
-				Message: "Failed to update user",
-				Data:    dto.UserDTO{},
-			},
-		)
+		ctx.JSON(http.StatusBadRequest, gin.H{"errors": fmt.Sprintf("failed to update a user: %s", err.Error())})
 		return
 	}
 
@@ -149,14 +121,13 @@ func (c *UserController) Update(ctx *gin.Context) {
 	if err != nil {
 		log.Printf("Failed to update user: %v", err)
 
-		ctx.JSON(
-			http.StatusInternalServerError,
-			common.BaseResponse[dto.UserDTO]{
-				Status:  http.StatusInternalServerError,
-				Message: "Failed to create user",
-				Data:    dto.UserDTO{},
-			},
-		)
+		var vErr *tools.ValidationError
+		if errors.As(err, &vErr) {
+			ctx.JSON(http.StatusConflict, vErr)
+			return
+		}
+
+		ctx.JSON(http.StatusInternalServerError, gin.H{"errors": err.Error()})
 		return
 	}
 
@@ -184,14 +155,7 @@ func (c *UserController) Delete(ctx *gin.Context) {
 	if err != nil {
 		log.Printf("Failed to delete user: %v", err)
 
-		ctx.JSON(
-			http.StatusInternalServerError,
-			common.BaseResponse[dto.UserDTO]{
-				Status:  http.StatusInternalServerError,
-				Message: "Failed to delete user",
-				Data:    dto.UserDTO{},
-			},
-		)
+		ctx.JSON(http.StatusBadRequest, gin.H{"errors": fmt.Sprintf("failed to delete a user: %s", err.Error())})
 		return
 	}
 
@@ -199,14 +163,13 @@ func (c *UserController) Delete(ctx *gin.Context) {
 	if err != nil {
 		log.Printf("Failed to delete user: %v", err)
 
-		ctx.JSON(
-			http.StatusInternalServerError,
-			common.BaseResponse[dto.UserDTO]{
-				Status:  http.StatusInternalServerError,
-				Message: "Failed to delete user",
-				Data:    dto.UserDTO{},
-			},
-		)
+		switch err {
+		case service.ErrUserNotFound:
+			ctx.JSON(http.StatusBadRequest, gin.H{"errors": fmt.Sprintf("%s: %s", service.ErrUserNotFound, err.Error())})
+		default:
+			ctx.JSON(http.StatusBadRequest, gin.H{"errors": fmt.Sprintf("failed to delete a user: %s", err.Error())})
+		}
+
 		return
 	}
 
@@ -234,14 +197,7 @@ func (c *UserController) GetByID(ctx *gin.Context) {
 	if err != nil {
 		log.Printf("Failed to find user with id %s: %v", parsedUUID, err)
 
-		ctx.JSON(
-			http.StatusInternalServerError,
-			common.BaseResponse[dto.UserDTO]{
-				Status:  http.StatusInternalServerError,
-				Message: fmt.Sprintf("Failed to find user with id %s: %v", parsedUUID, err),
-				Data:    dto.UserDTO{},
-			},
-		)
+		ctx.JSON(http.StatusBadRequest, gin.H{"errors": err.Error()})
 		return
 	}
 
@@ -249,14 +205,7 @@ func (c *UserController) GetByID(ctx *gin.Context) {
 	if err != nil {
 		log.Printf("Failed to find user with id %s: %v", parsedUUID, err)
 
-		ctx.JSON(
-			http.StatusInternalServerError,
-			common.BaseResponse[dto.UserDTO]{
-				Status:  http.StatusInternalServerError,
-				Message: fmt.Sprintf("Failed to find user with id %s: %v", parsedUUID, err),
-				Data:    dto.UserDTO{},
-			},
-		)
+		ctx.JSON(http.StatusBadRequest, gin.H{"errors": err.Error()})
 		return
 	}
 
@@ -285,14 +234,7 @@ func (c *UserController) GetByEmail(ctx *gin.Context) {
 	if err != nil {
 		log.Printf("Failed to find user with email %s: %v", email, err)
 
-		ctx.JSON(
-			http.StatusInternalServerError,
-			common.BaseResponse[dto.UserDTO]{
-				Status:  http.StatusInternalServerError,
-				Message: fmt.Sprintf("Failed to find user with email %s: %v", email, err),
-				Data:    dto.UserDTO{},
-			},
-		)
+		ctx.JSON(http.StatusBadRequest, gin.H{"errors": err.Error()})
 		return
 	}
 
