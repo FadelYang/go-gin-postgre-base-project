@@ -9,6 +9,6 @@ import (
 func RegisterRoutes(rg *gin.RouterGroup, exProvider *providers.Provider) {
 	exRoutes := rg.Group("/examples")
 
-	exRoutes.GET("", exProvider.ExController.GetExamples)
-	exRoutes.POST("", exProvider.ExController.Create)
+	exRoutes.GET("", exProvider.ExHandler.GetExamples)
+	exRoutes.POST("", exProvider.ExHandler.Create)
 }

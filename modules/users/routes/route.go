@@ -9,10 +9,10 @@ import (
 func RegisterRoutes(rg *gin.RouterGroup, userProvider *providers.Provider) {
 	exRoutes := rg.Group("/users")
 
-	exRoutes.GET("", userProvider.UserController.GetAll)
-	exRoutes.POST("", userProvider.UserController.Create)
-	exRoutes.PUT(":uuid", userProvider.UserController.Update)
-	exRoutes.DELETE("/:uuid", userProvider.UserController.Delete)
-	exRoutes.GET("/:uuid", userProvider.UserController.GetByID)
-	exRoutes.GET("/email/:email", userProvider.UserController.GetByEmail)
+	exRoutes.GET("", userProvider.UserHandler.GetAll)
+	exRoutes.POST("", userProvider.UserHandler.Create)
+	exRoutes.PUT(":uuid", userProvider.UserHandler.Update)
+	exRoutes.DELETE("/:uuid", userProvider.UserHandler.Delete)
+	exRoutes.GET("/:uuid", userProvider.UserHandler.GetByID)
+	exRoutes.GET("/email/:email", userProvider.UserHandler.GetByEmail)
 }

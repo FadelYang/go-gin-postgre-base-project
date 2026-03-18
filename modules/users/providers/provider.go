@@ -1,23 +1,23 @@
 package providers
 
 import (
-	"project-root/modules/users/controller"
+	"project-root/modules/users/handler"
 	"project-root/modules/users/repository"
-	"project-root/modules/users/service"
+	"project-root/modules/users/usecase"
 
 	"gorm.io/gorm"
 )
 
 type Provider struct {
-	UserController *controller.UserController
+	UserHandler *handler.UserHandler
 }
 
 func NewProvider(db *gorm.DB) *Provider {
 	repo := repository.NewuserRepository(db)
-	service := service.NewUserService(repo)
-	controller := controller.NewUserController(service)
+	usecase := usecase.NewUserUsecase(repo)
+	handler := handler.NewUserHandler(usecase)
 
 	return &Provider{
-		UserController: controller,
+		UserHandler: handler,
 	}
 }

@@ -1,4 +1,4 @@
-package controller
+package handler
 
 import (
 	"errors"
@@ -7,19 +7,19 @@ import (
 	"net/http"
 	"project-root/common"
 	"project-root/modules/users/dto"
-	"project-root/modules/users/service"
+	"project-root/modules/users/usecase"
 	"project-root/tools"
 
 	"github.com/gin-gonic/gin"
 )
 
-type UserController struct {
-	userService service.UserService
+type UserHandler struct {
+	userUsecase usecase.UserUsecase
 }
 
-func NewUserController(userService service.UserService) *UserController {
-	return &UserController{
-		userService: userService,
+func NewUserHandler(userUsecase usecase.UserUsecase) *UserHandler {
+	return &UserHandler{
+		userUsecase: userUsecase,
 	}
 }
 
@@ -30,8 +30,8 @@ func NewUserController(userService service.UserService) *UserController {
 // @Produce 			json
 // @Success				200 {object} common.BaseResponse[dto.UserDTO]
 // @Router				/users [get]
-func (c *UserController) GetAll(ctx *gin.Context) {
-	users, err := c.userService.GetAll()
+func (c *UserHandler) GetAll(ctx *gin.Context) {
+	users, err := c.userUsecase.GetAll()
 	if err != nil {
 		log.Printf("Failed to get users: %v", err)
 
@@ -57,16 +57,16 @@ func (c *UserController) GetAll(ctx *gin.Context) {
 // @Success				201 {object} common.BaseResponse[dto.UserDTO]
 // @Router				/users [post]
 // @Param					request body dto.CreateUser true "request body for create an user [RAW]"
-func (c *UserController) Create(ctx *gin.Context) {
+func (c *UserHandler) Create(ctx *gin.Context) {
 	var user dto.CreateUser
 	if err := ctx.ShouldBindBodyWithJSON(&user); err != nil {
 		log.Printf("Failed to create user: %v", err)
 
-		ctx.JSON(http.StatusBadRequest, gin.H{"errors": fmt.Sprintf("%s: %s", service.ErrCreateUserValidate, err.Error())})
+		ctx.JSON(http.StatusBadRequest, gin.H{"errors": fmt.Sprintf("%s: %s", usecase.ErrCreateUserValidate, err.Error())})
 		return
 	}
 
-	createdExample, err := c.userService.Create(user)
+	createdExample, err := c.userUsecase.Create(user)
 	if err != nil {
 		log.Printf("Failed to create user: %v", err)
 
@@ -76,7 +76,7 @@ func (c *UserController) Create(ctx *gin.Context) {
 			return
 		}
 
-		ctx.JSON(http.StatusBadRequest, gin.H{"errors": fmt.Sprintf("%s: %s", service.ErrCreateUserValidate, err.Error())})
+		ctx.JSON(http.StatusBadRequest, gin.H{"errors": fmt.Sprintf("%s: %s", usecase.ErrCreateUserValidate, err.Error())})
 		return
 	}
 
@@ -99,7 +99,7 @@ func (c *UserController) Create(ctx *gin.Context) {
 // @Router				/users/{uuid} [put]
 // @Param					uuid path string true "UUID"
 // @Param					request body dto.UpdateUser true "request body for update an example [RAW]"
-func (c *UserController) Update(ctx *gin.Context) {
+func (c *UserHandler) Update(ctx *gin.Context) {
 	stringUUID := ctx.Param("uuid")
 	parsedUUID, err := tools.StringToUUID(stringUUID)
 	if err != nil {
@@ -117,7 +117,7 @@ func (c *UserController) Update(ctx *gin.Context) {
 		return
 	}
 
-	updatedUser, err := c.userService.Update(user, parsedUUID)
+	updatedUser, err := c.userUsecase.Update(user, parsedUUID)
 	if err != nil {
 		log.Printf("Failed to update user: %v", err)
 
@@ -149,7 +149,7 @@ func (c *UserController) Update(ctx *gin.Context) {
 // @Success				200 {object} common.BaseResponse[dto.UserDTO]
 // @Router				/users/{uuid} [delete]
 // @Param					uuid path string true "UUID"
-func (c *UserController) Delete(ctx *gin.Context) {
+func (c *UserHandler) Delete(ctx *gin.Context) {
 	stringUUID := ctx.Param("uuid")
 	parsedUUID, err := tools.StringToUUID(stringUUID)
 	if err != nil {
@@ -159,13 +159,13 @@ func (c *UserController) Delete(ctx *gin.Context) {
 		return
 	}
 
-	deletedUser, err := c.userService.Delete(parsedUUID)
+	deletedUser, err := c.userUsecase.Delete(parsedUUID)
 	if err != nil {
 		log.Printf("Failed to delete user: %v", err)
 
 		switch err {
-		case service.ErrUserNotFound:
-			ctx.JSON(http.StatusBadRequest, gin.H{"errors": fmt.Sprintf("%s: %s", service.ErrUserNotFound, err.Error())})
+		case usecase.ErrUserNotFound:
+			ctx.JSON(http.StatusBadRequest, gin.H{"errors": fmt.Sprintf("%s: %s", usecase.ErrUserNotFound, err.Error())})
 		default:
 			ctx.JSON(http.StatusBadRequest, gin.H{"errors": fmt.Sprintf("failed to delete a user: %s", err.Error())})
 		}
@@ -191,7 +191,7 @@ func (c *UserController) Delete(ctx *gin.Context) {
 // @Success				200 {object} common.BaseResponse[dto.UserDTO]
 // @Router				/users/{uuid} [get]
 // @Param					uuid path string true "UUID"
-func (c *UserController) GetByID(ctx *gin.Context) {
+func (c *UserHandler) GetByID(ctx *gin.Context) {
 	stringUUID := ctx.Param("uuid")
 	parsedUUID, err := tools.StringToUUID(stringUUID)
 	if err != nil {
@@ -201,7 +201,7 @@ func (c *UserController) GetByID(ctx *gin.Context) {
 		return
 	}
 
-	user, err := c.userService.FindByID(parsedUUID)
+	user, err := c.userUsecase.FindByID(parsedUUID)
 	if err != nil {
 		log.Printf("Failed to find user with id %s: %v", parsedUUID, err)
 
@@ -227,10 +227,10 @@ func (c *UserController) GetByID(ctx *gin.Context) {
 // @Success				200 {object} common.BaseResponse[dto.UserDTO]
 // @Router				/users/email/{email} [get]
 // @Param					email path string true "User Email"
-func (c *UserController) GetByEmail(ctx *gin.Context) {
+func (c *UserHandler) GetByEmail(ctx *gin.Context) {
 	email := ctx.Param("email")
 
-	user, err := c.userService.FindByEmail(email)
+	user, err := c.userUsecase.FindByEmail(email)
 	if err != nil {
 		log.Printf("Failed to find user with email %s: %v", email, err)
 

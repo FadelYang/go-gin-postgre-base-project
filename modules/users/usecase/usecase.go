@@ -1,4 +1,4 @@
-package service
+package usecase
 
 import (
 	"errors"
@@ -22,7 +22,7 @@ var (
 	ErrDuplicateUsername  = errors.New("user with that username is already exists")
 )
 
-type UserService interface {
+type UserUsecase interface {
 	GetAll() ([]dto.UserDTO, error)
 	Create(user dto.CreateUser) (dto.UserDTO, error)
 	Update(user dto.UpdateUser, userID uuid.UUID) (dto.UserDTO, error)
@@ -31,17 +31,17 @@ type UserService interface {
 	FindByEmail(email string) (dto.UserDTO, error)
 }
 
-type userService struct {
+type userUsecase struct {
 	userRepo repository.UserRepository
 }
 
-func NewUserService(userRepo repository.UserRepository) UserService {
-	return &userService{
+func NewUserUsecase(userRepo repository.UserRepository) UserUsecase {
+	return &userUsecase{
 		userRepo: userRepo,
 	}
 }
 
-func (s *userService) GetAll() ([]dto.UserDTO, error) {
+func (s *userUsecase) GetAll() ([]dto.UserDTO, error) {
 	users, err := s.userRepo.FindAll()
 	if err != nil {
 		return nil, err
@@ -61,7 +61,7 @@ func (s *userService) GetAll() ([]dto.UserDTO, error) {
 	return result, nil
 }
 
-func (s *userService) Create(form dto.CreateUser) (dto.UserDTO, error) {
+func (s *userUsecase) Create(form dto.CreateUser) (dto.UserDTO, error) {
 	passwordHash, err := tools.HashPassword(form.Password)
 	if err != nil {
 		return dto.UserDTO{}, err
@@ -100,7 +100,7 @@ func (s *userService) Create(form dto.CreateUser) (dto.UserDTO, error) {
 	}, nil
 }
 
-func (s *userService) Update(user dto.UpdateUser, userID uuid.UUID) (dto.UserDTO, error) {
+func (s *userUsecase) Update(user dto.UpdateUser, userID uuid.UUID) (dto.UserDTO, error) {
 	existData, err := s.userRepo.FindByID(userID)
 	if err != nil {
 		return dto.UserDTO{}, err
@@ -136,7 +136,7 @@ func (s *userService) Update(user dto.UpdateUser, userID uuid.UUID) (dto.UserDTO
 	}, nil
 }
 
-func (s *userService) Delete(id uuid.UUID) (dto.UserDTO, error) {
+func (s *userUsecase) Delete(id uuid.UUID) (dto.UserDTO, error) {
 	userToDelete, err := s.FindByID(id)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
@@ -153,7 +153,7 @@ func (s *userService) Delete(id uuid.UUID) (dto.UserDTO, error) {
 	return userToDelete, nil
 }
 
-func (s *userService) FindByID(id uuid.UUID) (dto.UserDTO, error) {
+func (s *userUsecase) FindByID(id uuid.UUID) (dto.UserDTO, error) {
 	user, err := s.userRepo.FindByID(id)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
@@ -172,7 +172,7 @@ func (s *userService) FindByID(id uuid.UUID) (dto.UserDTO, error) {
 	}, nil
 }
 
-func (s *userService) FindByEmail(email string) (dto.UserDTO, error) {
+func (s *userUsecase) FindByEmail(email string) (dto.UserDTO, error) {
 	user, err := s.userRepo.FindByEmail(email)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {

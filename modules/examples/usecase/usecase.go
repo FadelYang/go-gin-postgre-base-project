@@ -1,4 +1,4 @@
-package service
+package usecase
 
 import (
 	"fmt"
@@ -7,26 +7,26 @@ import (
 	"project-root/modules/examples/repository"
 )
 
-type ExampleService interface {
+type ExampleUsecase interface {
 	GetExamples() ([]dto.ExampleDTO, error)
 	CreateExample(example dto.ExampleDTO) (dto.ExampleDTO, error)
 }
 
-type exampleService struct {
+type exampleUsecase struct {
 	exampleRepository repository.ExampleRepository
 }
 
-func NewExampleService(example repository.ExampleRepository) ExampleService {
-	return &exampleService{
+func NewExampleUsecase(example repository.ExampleRepository) ExampleUsecase {
+	return &exampleUsecase{
 		exampleRepository: example,
 	}
 }
 
-func (s *exampleService) GetExamples() ([]dto.ExampleDTO, error) {
+func (s *exampleUsecase) GetExamples() ([]dto.ExampleDTO, error) {
 	return nil, fmt.Errorf("not implemented")
 }
 
-func (s *exampleService) CreateExample(example dto.ExampleDTO) (dto.ExampleDTO, error) {
+func (s *exampleUsecase) CreateExample(example dto.ExampleDTO) (dto.ExampleDTO, error) {
 	exampleForm := model.Example{
 		Name: example.Name,
 	}

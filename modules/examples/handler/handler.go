@@ -1,22 +1,22 @@
-package controller
+package handler
 
 import (
 	"log"
 	"net/http"
 	"project-root/common"
 	"project-root/modules/examples/dto"
-	"project-root/modules/examples/service"
+	"project-root/modules/examples/usecase"
 
 	"github.com/gin-gonic/gin"
 )
 
-type ExampleController struct {
-	exampleService service.ExampleService
+type ExampleHandler struct {
+	exampleUsecase usecase.ExampleUsecase
 }
 
-func NewExampleController(example service.ExampleService) *ExampleController {
-	return &ExampleController{
-		exampleService: example,
+func NewExampleHandler(example usecase.ExampleUsecase) *ExampleHandler {
+	return &ExampleHandler{
+		exampleUsecase: example,
 	}
 }
 
@@ -27,8 +27,8 @@ func NewExampleController(example service.ExampleService) *ExampleController {
 // @Produce 			json
 // @Success				200 {object} common.BaseResponse[dto.ExampleDTO]
 // @Router				/examples [get]
-func (c *ExampleController) GetExamples(ctx *gin.Context) {
-	examples, err := c.exampleService.GetExamples()
+func (c *ExampleHandler) GetExamples(ctx *gin.Context) {
+	examples, err := c.exampleUsecase.GetExamples()
 	if err != nil {
 		log.Printf("Failed to get examples: %v", err)
 
@@ -61,7 +61,7 @@ func (c *ExampleController) GetExamples(ctx *gin.Context) {
 // @Success				201 {object} common.BaseResponse[dto.ExampleDTO]
 // @Router				/examples [post]
 // @Param					request body dto.CreateExample true "request body for create an example [RAW]"
-func (c *ExampleController) Create(ctx *gin.Context) {
+func (c *ExampleHandler) Create(ctx *gin.Context) {
 	var example dto.ExampleDTO
 	if err := ctx.ShouldBindBodyWithJSON(&example); err != nil {
 		log.Printf("Failed to create an example: %v", err)
@@ -77,7 +77,7 @@ func (c *ExampleController) Create(ctx *gin.Context) {
 		return
 	}
 
-	createdExample, err := c.exampleService.CreateExample(example)
+	createdExample, err := c.exampleUsecase.CreateExample(example)
 	if err != nil {
 		log.Printf("Failed to create an example: %v", err)
 
