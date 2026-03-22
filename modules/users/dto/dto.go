@@ -8,8 +8,11 @@ import (
 
 type UserDTO struct {
 	UUID         uuid.UUID `json:"id" example:"a53515e3-5a7f-440b-82f6-3d84ac7ce746"`
-	Username     string    `json:"username" example:"Budi Pambudi"`
+	Username     string    `json:"username" example:"budidoremi123"`
 	Email        string    `json:"email" example:"budipambudi@gmail.com"`
+	FirstName    string    `json:"first_name" example:"Budi"`
+	LastName     string    `json:"last_name" example:"Pambudi"`
+	PhoneNumber  string    `json:"phonenumber" example:"628515682123"`
 	PasswordHash string    `json:"-" example:"$2a$10$N9qo8uLOickgx2ZMRZo5i.eW5qk8Qy4T/3yFz5eF5r5eF5r5eF5r5e"`
 	CreatedAt    time.Time `json:"created_at" example:"1617181723"`
 	UpdatedAt    time.Time `json:"updated_at" example:"1617181723"`
@@ -18,6 +21,9 @@ type UserDTO struct {
 type CreateUser struct {
 	Username     string    `json:"username" example:"Budi Pambudi"`
 	Email        string    `json:"email" example:"budipambudi@gmail.com"`
+	FirstName    string    `json:"first_name" example:"Budi"`
+	LastName     string    `json:"last_name" example:"Pambudi"`
+	PhoneNumber  string    `json:"phonenumber" example:"628515682123"`
 	Password     string    `json:"password" example:"supersecretpassword"`
 	PasswordHash string    `json:"-"`
 	CreatedAt    time.Time `json:"-"`

@@ -15,6 +15,7 @@ type UserRepository interface {
 	FindByID(id uuid.UUID) (model.User, error)
 	FindByEmail(email string) (model.User, error)
 	FindByUsername(username string) (model.User, error)
+	FindByPhonenumber(phonenumber string) (model.User, error)
 }
 
 type userRepository struct {
@@ -85,6 +86,15 @@ func (r *userRepository) FindByEmail(email string) (model.User, error) {
 func (r *userRepository) FindByUsername(username string) (model.User, error) {
 	var user model.User
 	if err := r.db.First(&user, "username = ?", username).Error; err != nil {
+		return model.User{}, err
+	}
+
+	return user, nil
+}
+
+func (r *userRepository) FindByPhonenumber(phonenumber string) (model.User, error) {
+	var user model.User
+	if err := r.db.First(&user, "phonenumber = ?", phonenumber).Error; err != nil {
 		return model.User{}, err
 	}
 
