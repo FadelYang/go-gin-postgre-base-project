@@ -15,6 +15,40 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
+        "/auth/register": {
+            "post": {
+                "description": "Register a new account",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "auth"
+                ],
+                "summary": "Register new account",
+                "parameters": [
+                    {
+                        "description": "request body for create an user [RAW]",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.CreateUser"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/common.BaseResponse-dto_UserDTO"
+                        }
+                    }
+                }
+            }
+        },
         "/examples": {
             "get": {
                 "description": "get all example data",
@@ -307,9 +341,21 @@ const docTemplate = `{
                     "type": "string",
                     "example": "budipambudi@gmail.com"
                 },
+                "first_name": {
+                    "type": "string",
+                    "example": "Budi"
+                },
+                "last_name": {
+                    "type": "string",
+                    "example": "Pambudi"
+                },
                 "password": {
                     "type": "string",
                     "example": "supersecretpassword"
+                },
+                "phonenumber": {
+                    "type": "string",
+                    "example": "628515682123"
                 },
                 "username": {
                     "type": "string",
@@ -354,9 +400,21 @@ const docTemplate = `{
                     "type": "string",
                     "example": "budipambudi@gmail.com"
                 },
+                "first_name": {
+                    "type": "string",
+                    "example": "Budi"
+                },
                 "id": {
                     "type": "string",
                     "example": "a53515e3-5a7f-440b-82f6-3d84ac7ce746"
+                },
+                "last_name": {
+                    "type": "string",
+                    "example": "Pambudi"
+                },
+                "phonenumber": {
+                    "type": "string",
+                    "example": "628515682123"
                 },
                 "updated_at": {
                     "type": "string",
@@ -364,7 +422,7 @@ const docTemplate = `{
                 },
                 "username": {
                     "type": "string",
-                    "example": "Budi Pambudi"
+                    "example": "budidoremi123"
                 }
             }
         }

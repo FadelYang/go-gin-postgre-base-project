@@ -31,8 +31,17 @@ definitions:
       email:
         example: budipambudi@gmail.com
         type: string
+      first_name:
+        example: Budi
+        type: string
+      last_name:
+        example: Pambudi
+        type: string
       password:
         example: supersecretpassword
+        type: string
+      phonenumber:
+        example: "628515682123"
         type: string
       username:
         example: Budi Pambudi
@@ -64,14 +73,23 @@ definitions:
       email:
         example: budipambudi@gmail.com
         type: string
+      first_name:
+        example: Budi
+        type: string
       id:
         example: a53515e3-5a7f-440b-82f6-3d84ac7ce746
+        type: string
+      last_name:
+        example: Pambudi
+        type: string
+      phonenumber:
+        example: "628515682123"
         type: string
       updated_at:
         example: "1617181723"
         type: string
       username:
-        example: Budi Pambudi
+        example: budidoremi123
         type: string
     type: object
 info:
@@ -80,6 +98,28 @@ info:
   title: Go, Gin, and Postgre Base Project
   version: "1.0"
 paths:
+  /auth/register:
+    post:
+      consumes:
+      - application/json
+      description: Register a new account
+      parameters:
+      - description: request body for create an user [RAW]
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.CreateUser'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/common.BaseResponse-dto_UserDTO'
+      summary: Register new account
+      tags:
+      - auth
   /examples:
     get:
       consumes:
