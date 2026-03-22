@@ -14,6 +14,7 @@ type UserRepository interface {
 	Delete(id uuid.UUID) error
 	FindByID(id uuid.UUID) (model.User, error)
 	FindByEmail(email string) (model.User, error)
+	FindByUsername(username string) (model.User, error)
 }
 
 type userRepository struct {
@@ -75,6 +76,15 @@ func (r *userRepository) FindByID(id uuid.UUID) (model.User, error) {
 func (r *userRepository) FindByEmail(email string) (model.User, error) {
 	var user model.User
 	if err := r.db.First(&user, "email = ?", email).Error; err != nil {
+		return model.User{}, err
+	}
+
+	return user, nil
+}
+
+func (r *userRepository) FindByUsername(username string) (model.User, error) {
+	var user model.User
+	if err := r.db.First(&user, "username = ?", username).Error; err != nil {
 		return model.User{}, err
 	}
 
