@@ -5,6 +5,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 
+	auth "project-root/modules/auth/routes"
 	ex "project-root/modules/examples/routes"
 	users "project-root/modules/users/routes"
 
@@ -19,4 +20,5 @@ func InitRoutes(r *gin.Engine, p *providers.Providers) {
 
 	ex.RegisterRoutes(api, p.Examples)
 	users.RegisterRoutes(api, p.Users)
+	auth.RegisterRoutes(api, p.Auth)
 }
