@@ -9,3 +9,9 @@ type Auth struct {
 	FirstName   string    `json:"first_name"`
 	LastName    string    `json:"last_name"`
 }
+
+type GenerateTokenPayload struct {
+	UserID    uuid.UUID `json:"user_id"`
+	SessionID uuid.UUID `json:"session_id"`
+	Version   uint      `json:"version"`
+}
