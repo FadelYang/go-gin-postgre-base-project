@@ -1,6 +1,7 @@
 package usecase
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"project-root/modules/users/dto"
@@ -24,7 +25,7 @@ var (
 
 type UserUsecase interface {
 	GetAll() ([]dto.UserDTO, error)
-	Create(user dto.CreateUser) (dto.UserDTO, error)
+	Create(ctx context.Context, user dto.CreateUser) (dto.UserDTO, error)
 	Update(user dto.UpdateUser, userID uuid.UUID) (dto.UserDTO, error)
 	Delete(id uuid.UUID) (dto.UserDTO, error)
 	FindByID(id uuid.UUID) (dto.UserDTO, error)
@@ -61,7 +62,7 @@ func (s *userUsecase) GetAll() ([]dto.UserDTO, error) {
 	return result, nil
 }
 
-func (s *userUsecase) Create(form dto.CreateUser) (dto.UserDTO, error) {
+func (s *userUsecase) Create(ctx context.Context, form dto.CreateUser) (dto.UserDTO, error) {
 	passwordHash, err := tools.HashPassword(form.Password)
 	if err != nil {
 		return dto.UserDTO{}, err
@@ -73,7 +74,7 @@ func (s *userUsecase) Create(form dto.CreateUser) (dto.UserDTO, error) {
 		PasswordHash: passwordHash,
 	}
 
-	createdUser, err := s.userRepo.Create(userForm)
+	createdUser, err := s.userRepo.Create(ctx, userForm)
 	if err != nil {
 		fmt.Println("created user", err)
 

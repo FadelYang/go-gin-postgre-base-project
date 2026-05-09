@@ -1,11 +1,13 @@
 package usecase
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"net/http"
 	"os"
 	"project-root/modules/auth/dto"
+	"project-root/modules/auth/model"
 	"project-root/modules/auth/repository"
 	userDTO "project-root/modules/users/dto"
 	userModel "project-root/modules/users/model"
@@ -16,6 +18,7 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgconn"
+	"github.com/redis/go-redis/v9"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -25,13 +28,14 @@ var (
 )
 
 type AuthUsecase interface {
-	Register(form userDTO.CreateUser) (createdUser *userModel.User, err error)
+	Register(ctx context.Context, form userDTO.CreateUser) (createdUser *userModel.User, err error)
 	Login(form dto.LoginDTO) (response *dto.LoginResponse, code int, err error)
 }
 
 type authUsecase struct {
-	authRepo repository.AuthRepository
-	userRepo userRepository.UserRepository
+	RedisClient redis.Client
+	authRepo    repository.AuthRepository
+	userRepo    userRepository.UserRepository
 }
 
 func NewAuthUsecase(
@@ -44,7 +48,7 @@ func NewAuthUsecase(
 	}
 }
 
-func (u *authUsecase) Register(form userDTO.CreateUser) (createdUser *userModel.User, err error) {
+func (u *authUsecase) Register(ctx context.Context, form userDTO.CreateUser) (createdUser *userModel.User, err error) {
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(form.Password), bcrypt.DefaultCost)
 	if err != nil {
 		return nil, fmt.Errorf("failed to hash password")
@@ -59,7 +63,7 @@ func (u *authUsecase) Register(form userDTO.CreateUser) (createdUser *userModel.
 		PasswordHash: string(hashedPassword),
 	}
 
-	user, err := u.userRepo.Create(createUserForm)
+	user, err := u.userRepo.Create(ctx, createUserForm)
 	if err != nil {
 		var pgErr *pgconn.PgError
 		if errors.As(err, &pgErr) {
@@ -135,12 +139,36 @@ func (u *authUsecase) Login(form dto.LoginDTO) (response *dto.LoginResponse, cod
 		return nil, http.StatusBadRequest, errors.New("invalid credentials")
 	}
 
-	accessToken, err := u.generateAccessToken(user.ID)
+	sessionID := uuid.New()
+
+	generateTokenPayload := model.GenerateTokenPayload{
+		UserID:    user.ID,
+		SessionID: sessionID,
+		Version:   1,
+	}
+
+	accessToken, err := u.generateAccessToken(generateTokenPayload)
 	if err != nil {
 		return nil, http.StatusBadRequest, err
 	}
 
-	refreshToken, err := u.generateRefreshToken(user.ID)
+	refreshToken, err := u.generateRefreshToken(generateTokenPayload)
+	if err != nil {
+		return nil, http.StatusBadRequest, err
+	}
+
+	redisKey := fmt.Sprintf(
+		"refresh_token:%s:%s",
+		user.ID,
+		sessionID,
+	)
+
+	err = u.RedisClient.Set(
+		ctx,
+		redisKey,
+		refreshToken,
+		7*24*time.Hour,
+	).Err()
 	if err != nil {
 		return nil, http.StatusBadRequest, err
 	}
@@ -151,14 +179,14 @@ func (u *authUsecase) Login(form dto.LoginDTO) (response *dto.LoginResponse, cod
 	}, http.StatusOK, nil
 }
 
-func (u *authUsecase) generateAccessToken(userID uuid.UUID) (string, error) {
+func (u *authUsecase) generateAccessToken(payload model.GenerateTokenPayload) (string, error) {
 	jti := uuid.NewString()
 
 	claims := dto.AccessTokenClaim{
-		UserID: userID,
+		UserID: payload.UserID,
 		RegisteredClaims: jwt.RegisteredClaims{
 			ID:        jti,
-			ExpiresAt: jwt.NewNumericDate(time.Now().Add(7 * 24 * time.Hour)),
+			ExpiresAt: jwt.NewNumericDate(time.Now().Add(1 * 15 * time.Minute)),
 			IssuedAt:  jwt.NewNumericDate(time.Now()),
 		},
 	}
@@ -173,11 +201,13 @@ func (u *authUsecase) generateAccessToken(userID uuid.UUID) (string, error) {
 	return signedToken, nil
 }
 
-func (u *authUsecase) generateRefreshToken(userID uuid.UUID) (string, error) {
+func (u *authUsecase) generateRefreshToken(payload model.GenerateTokenPayload) (string, error) {
 	jti := uuid.NewString()
 
 	claims := dto.RefreshTokenClaim{
-		UserID: userID,
+		UserID:    payload.UserID,
+		SessionID: payload.SessionID,
+		Version:   payload.Version,
 		RegisteredClaims: jwt.RegisteredClaims{
 			ID:        jti,
 			ExpiresAt: jwt.NewNumericDate(time.Now().Add(7 * 24 * time.Hour)),

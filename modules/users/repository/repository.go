@@ -1,6 +1,7 @@
 package repository
 
 import (
+	"context"
 	"project-root/modules/users/model"
 
 	"github.com/google/uuid"
@@ -9,7 +10,7 @@ import (
 
 type UserRepository interface {
 	FindAll() ([]model.User, error)
-	Create(user model.User) (model.User, error)
+	Create(ctx context.Context, user model.User) (model.User, error)
 	Update(user model.User) (model.User, error)
 	Delete(id uuid.UUID) error
 	FindByID(id uuid.UUID) (model.User, error)
@@ -38,8 +39,10 @@ func (r *userRepository) FindAll() ([]model.User, error) {
 	return users, nil
 }
 
-func (r *userRepository) Create(User model.User) (model.User, error) {
-	if err := r.db.Create(&User).Error; err != nil {
+func (r *userRepository) Create(ctx context.Context, User model.User) (model.User, error) {
+	if err := r.db.
+		WithContext(ctx).
+		Create(&User).Error; err != nil {
 		return model.User{}, err
 	}
 

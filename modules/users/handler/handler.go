@@ -66,7 +66,7 @@ func (c *UserHandler) Create(ctx *gin.Context) {
 		return
 	}
 
-	createdExample, err := c.userUsecase.Create(user)
+	createdExample, err := c.userUsecase.Create(ctx.Request.Context(), user)
 	if err != nil {
 		log.Printf("Failed to create user: %v", err)
 

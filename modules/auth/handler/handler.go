@@ -37,7 +37,7 @@ func (h *AuthHandler) Register(ctx *gin.Context) {
 		return
 	}
 
-	createdUser, err := h.authUsecase.Register(user)
+	createdUser, err := h.authUsecase.Register(ctx.Request.Context(), user)
 	if err != nil {
 		var vErr *tools.ValidationError
 		if errors.As(err, &vErr) {
