@@ -2,6 +2,7 @@ package usecase
 
 import (
 	"errors"
+	"fmt"
 	"net/http"
 	"os"
 	"project-root/modules/auth/dto"
@@ -9,10 +10,12 @@ import (
 	userDTO "project-root/modules/users/dto"
 	userModel "project-root/modules/users/model"
 	userRepository "project-root/modules/users/repository"
+	"project-root/tools"
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5/pgconn"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -44,7 +47,7 @@ func NewAuthUsecase(
 func (u *authUsecase) Register(form userDTO.CreateUser) (createdUser *userModel.User, err error) {
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(form.Password), bcrypt.DefaultCost)
 	if err != nil {
-
+		return nil, fmt.Errorf("failed to hash password")
 	}
 
 	createUserForm := userModel.User{
@@ -58,7 +61,45 @@ func (u *authUsecase) Register(form userDTO.CreateUser) (createdUser *userModel.
 
 	user, err := u.userRepo.Create(createUserForm)
 	if err != nil {
-		return nil, err
+		var pgErr *pgconn.PgError
+		if errors.As(err, &pgErr) {
+			if pgErr.Code == "23505" {
+				switch pgErr.ConstraintName {
+
+				case "users_username_key":
+					return &user, &tools.ValidationError{
+						Errors: []tools.FieldError{
+							{
+								Field:   "username",
+								Message: "username already exists",
+							},
+						},
+					}
+
+				case "users_email_key":
+					return &user, &tools.ValidationError{
+						Errors: []tools.FieldError{
+							{
+								Field:   "email",
+								Message: "email already exists",
+							},
+						},
+					}
+
+				case "users_phonenumber_key":
+					return &user, &tools.ValidationError{
+						Errors: []tools.FieldError{
+							{
+								Field:   "phonenumber",
+								Message: "phonenumber already exists",
+							},
+						},
+					}
+				}
+			}
+		}
+
+		return &user, err
 	}
 
 	return &user, nil

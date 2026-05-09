@@ -3,7 +3,6 @@ package handler
 import (
 	"errors"
 	"fmt"
-	"log"
 	"net/http"
 	"project-root/common"
 	"project-root/modules/auth/usecase"
@@ -34,21 +33,19 @@ func NewAuthHandler(authUsecase usecase.AuthUsecase) *AuthHandler {
 func (h *AuthHandler) Register(ctx *gin.Context) {
 	var user userDTO.CreateUser
 	if err := ctx.ShouldBindBodyWithJSON(&user); err != nil {
-		log.Printf("Failed to create user: %v", err)
-
 		ctx.JSON(http.StatusBadRequest, gin.H{"errors": fmt.Sprintf("%s: %s", "failed to create a new account", err.Error())})
 		return
 	}
 
 	createdUser, err := h.authUsecase.Register(user)
 	if err != nil {
-		log.Printf("Failed to create user: %v", err)
-
 		var vErr *tools.ValidationError
 		if errors.As(err, &vErr) {
 			ctx.JSON(http.StatusConflict, vErr)
 			return
 		}
+
+		fmt.Printf("errors: %+v", err)
 
 		ctx.JSON(http.StatusBadRequest, gin.H{"errors": fmt.Sprintf("%s: %s", "failed to create a new account", err.Error())})
 		return
