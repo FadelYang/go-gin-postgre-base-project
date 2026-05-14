@@ -81,6 +81,11 @@ definitions:
       refresh_token:
         type: string
     type: object
+  dto.RefreshAccessToken:
+    properties:
+      access_token:
+        type: string
+    type: object
   dto.UpdateUser:
     properties:
       email:
@@ -143,6 +148,28 @@ paths:
           schema:
             $ref: '#/definitions/common.BaseResponse-dto_LoginResponse'
       summary: Login
+      tags:
+      - auth
+  /auth/refresh_login:
+    post:
+      consumes:
+      - application/json
+      description: Get new access token
+      parameters:
+      - description: request body for get new access token [RAW]
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.RefreshAccessToken'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/common.BaseResponse-dto_LoginResponse'
+      summary: Refresh Login
       tags:
       - auth
   /auth/register:
