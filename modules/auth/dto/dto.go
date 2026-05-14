@@ -32,5 +32,10 @@ type RefreshTokenClaim struct {
 	UserID    uuid.UUID `json:"user_id"`
 	SessionID uuid.UUID `json:"seession_id"`
 	Version   uint      `json:"version"`
+	Type      string    `json:"type"`
 	jwt.RegisteredClaims
+}
+
+type RefreshAccessToken struct {
+	RefreshToken string `json:"access_token"`
 }

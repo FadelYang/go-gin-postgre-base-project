@@ -30,6 +30,7 @@ var (
 type AuthUsecase interface {
 	Register(ctx context.Context, form userDTO.CreateUser) (createdUser *userModel.User, err error)
 	Login(ctx context.Context, form dto.LoginDTO) (response *dto.LoginResponse, code int, err error)
+	RefreshLogin(ctx context.Context, refteshToken string) (newAccessToken *string, err error)
 }
 
 type authUsecase struct {
@@ -157,6 +158,8 @@ func (u *authUsecase) Login(ctx context.Context, form dto.LoginDTO) (response *d
 		return nil, http.StatusBadRequest, err
 	}
 
+	hashedRefreshToken := tools.HashToken(refreshToken)
+
 	redisKey := fmt.Sprintf(
 		"refresh_token:%s:%s",
 		user.ID,
@@ -166,7 +169,7 @@ func (u *authUsecase) Login(ctx context.Context, form dto.LoginDTO) (response *d
 	err = u.RedisClient.Set(
 		ctx,
 		redisKey,
-		refreshToken,
+		hashedRefreshToken,
 		7*24*time.Hour,
 	).Err()
 	if err != nil {
@@ -208,6 +211,7 @@ func (u *authUsecase) generateRefreshToken(payload model.GenerateTokenPayload) (
 		UserID:    payload.UserID,
 		SessionID: payload.SessionID,
 		Version:   payload.Version,
+		Type:      "refresh",
 		RegisteredClaims: jwt.RegisteredClaims{
 			ID:        jti,
 			ExpiresAt: jwt.NewNumericDate(time.Now().Add(7 * 24 * time.Hour)),
@@ -223,4 +227,56 @@ func (u *authUsecase) generateRefreshToken(payload model.GenerateTokenPayload) (
 	}
 
 	return signedToken, nil
+}
+
+func (u *authUsecase) RefreshLogin(ctx context.Context, refreshToken string) (newAccessToken *string, err error) {
+	token, err := jwt.ParseWithClaims(
+		refreshToken,
+		&dto.RefreshTokenClaim{},
+		func(token *jwt.Token) (any, error) {
+			if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+				return nil, errors.New("unexpected signing method")
+			}
+			return refreshSecret, nil
+		},
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	claims := token.Claims.(*dto.RefreshTokenClaim)
+
+	if claims.Type != "refresh" {
+		return nil, errors.New("invalid token type")
+	}
+
+	redisKey := fmt.Sprintf(
+		"refresh_token:%s:%s",
+		claims.UserID,
+		claims.SessionID,
+	)
+
+	storedHash, err := u.RedisClient.Get(ctx, redisKey).Result()
+	if err != nil {
+		return nil, errors.New("refresh token already revoked, please login again")
+	}
+
+	incomingHash := tools.HashToken(refreshToken)
+
+	if incomingHash != storedHash {
+		return nil, errors.New("invalid refresh token")
+	}
+
+	accessTokenPayload := model.GenerateTokenPayload{
+		UserID:    claims.UserID,
+		SessionID: claims.SessionID,
+		Version:   claims.Version,
+	}
+
+	accessToken, err := u.generateAccessToken(accessTokenPayload)
+	if err != nil {
+		return nil, err
+	}
+
+	return &accessToken, nil
 }
