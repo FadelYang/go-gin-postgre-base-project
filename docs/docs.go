@@ -15,6 +15,40 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
+        "/auth/login": {
+            "post": {
+                "description": "Login",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "auth"
+                ],
+                "summary": "Login",
+                "parameters": [
+                    {
+                        "description": "request body for create an user [RAW]",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.LoginDTO"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/common.BaseResponse-dto_LoginResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/auth/register": {
             "post": {
                 "description": "Register a new account",
@@ -308,6 +342,20 @@ const docTemplate = `{
                 }
             }
         },
+        "common.BaseResponse-dto_LoginResponse": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "$ref": "#/definitions/dto.LoginResponse"
+                },
+                "message": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "integer"
+                }
+            }
+        },
         "common.BaseResponse-dto_UserDTO": {
             "type": "object",
             "properties": {
@@ -373,6 +421,31 @@ const docTemplate = `{
                 "name": {
                     "type": "string",
                     "example": "Bakwan Jagung"
+                }
+            }
+        },
+        "dto.LoginDTO": {
+            "type": "object",
+            "properties": {
+                "choosen_key": {
+                    "type": "string"
+                },
+                "key": {
+                    "type": "string"
+                },
+                "password": {
+                    "type": "string"
+                }
+            }
+        },
+        "dto.LoginResponse": {
+            "type": "object",
+            "properties": {
+                "access_token": {
+                    "type": "string"
+                },
+                "refresh_token": {
+                    "type": "string"
                 }
             }
         },
