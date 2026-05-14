@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/http"
 	"project-root/common"
+	authDTO "project-root/modules/auth/dto"
 	"project-root/modules/auth/usecase"
 	userDTO "project-root/modules/users/dto"
 	"project-root/tools"
@@ -64,6 +65,44 @@ func (h *AuthHandler) Register(ctx *gin.Context) {
 				LastName:    createdUser.LastName,
 				PhoneNumber: createdUser.Phonenumber,
 			},
+		},
+	)
+}
+
+// @Tags 					auth
+// @Summary				Login
+// @Description 	Login
+// @Accept 				json
+// @Produce 			json
+// @Success				200 {object} common.BaseResponse[authDTO.LoginResponse]
+// @Router				/auth/login [post]
+// @Param					request body authDTO.LoginDTO true "request body for create an user [RAW]"
+func (h *AuthHandler) Login(ctx *gin.Context) {
+	var loginForm authDTO.LoginDTO
+	if err := ctx.ShouldBindBodyWithJSON(&loginForm); err != nil {
+		ctx.JSON(
+			http.StatusBadRequest,
+			gin.H{
+				"errors": fmt.Sprintf("%s: %s", "failed to login an account", err.Error()),
+			},
+		)
+	}
+
+	response, code, err := h.authUsecase.Login(ctx.Request.Context(), loginForm)
+	if err != nil {
+		ctx.JSON(
+			code,
+			gin.H{
+				"errors": fmt.Sprintf("%s: %s", "failed to login an account", err.Error()),
+			},
+		)
+	}
+
+	ctx.JSON(
+		code,
+		common.BaseResponse[authDTO.LoginResponse]{
+			Message: "login success",
+			Data:    *response,
 		},
 	)
 }

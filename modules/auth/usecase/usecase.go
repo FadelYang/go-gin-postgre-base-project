@@ -29,7 +29,7 @@ var (
 
 type AuthUsecase interface {
 	Register(ctx context.Context, form userDTO.CreateUser) (createdUser *userModel.User, err error)
-	Login(form dto.LoginDTO) (response *dto.LoginResponse, code int, err error)
+	Login(ctx context.Context, form dto.LoginDTO) (response *dto.LoginResponse, code int, err error)
 }
 
 type authUsecase struct {
@@ -109,7 +109,7 @@ func (u *authUsecase) Register(ctx context.Context, form userDTO.CreateUser) (cr
 	return &user, nil
 }
 
-func (u *authUsecase) Login(form dto.LoginDTO) (response *dto.LoginResponse, code int, err error) {
+func (u *authUsecase) Login(ctx context.Context, form dto.LoginDTO) (response *dto.LoginResponse, code int, err error) {
 	var user userModel.User
 
 	switch form.ChoosenKey {
