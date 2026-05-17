@@ -40,12 +40,14 @@ type authUsecase struct {
 }
 
 func NewAuthUsecase(
+	redisClient *redis.Client,
 	authRepo repository.AuthRepository,
 	userRepo userRepository.UserRepository,
 ) AuthUsecase {
 	return &authUsecase{
-		authRepo: authRepo,
-		userRepo: userRepo,
+		RedisClient: *redisClient,
+		authRepo:    authRepo,
+		userRepo:    userRepo,
 	}
 }
 
