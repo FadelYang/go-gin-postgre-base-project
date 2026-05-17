@@ -486,7 +486,7 @@ const docTemplate = `{
         "dto.RefreshAccessToken": {
             "type": "object",
             "properties": {
-                "access_token": {
+                "refresh_token": {
                     "type": "string"
                 }
             }

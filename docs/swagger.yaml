@@ -83,7 +83,7 @@ definitions:
     type: object
   dto.RefreshAccessToken:
     properties:
-      access_token:
+      refresh_token:
         type: string
     type: object
   dto.UpdateUser:

@@ -11,4 +11,5 @@ func RegisterRoutes(rg *gin.RouterGroup, exProvider *providers.Provider) {
 
 	exRoutes.POST("/register", exProvider.AuthHandler.Register)
 	exRoutes.POST("/login", exProvider.AuthHandler.Login)
+	exRoutes.POST("/refresh_login", exProvider.AuthHandler.RefreshLogin)
 }

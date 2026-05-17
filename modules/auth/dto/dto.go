@@ -37,5 +37,5 @@ type RefreshTokenClaim struct {
 }
 
 type RefreshAccessToken struct {
-	RefreshToken string `json:"access_token"`
+	RefreshToken string `json:"refresh_token"`
 }
