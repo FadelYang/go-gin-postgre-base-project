@@ -10,4 +10,5 @@ func RegisterRoutes(rg *gin.RouterGroup, exProvider *providers.Provider) {
 	exRoutes := rg.Group("/auth")
 
 	exRoutes.POST("/register", exProvider.AuthHandler.Register)
+	exRoutes.POST("/login", exProvider.AuthHandler.Login)
 }

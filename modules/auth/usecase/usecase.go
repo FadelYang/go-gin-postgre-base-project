@@ -138,7 +138,7 @@ func (u *authUsecase) Login(ctx context.Context, form dto.LoginDTO) (response *d
 		return nil, code, err
 	}
 
-	if err = bcrypt.CompareHashAndPassword([]byte(form.RawPassword), []byte(hashedPassword)); err != nil {
+	if err = bcrypt.CompareHashAndPassword([]byte(hashedPassword), []byte(form.RawPassword)); err != nil {
 		return nil, http.StatusBadRequest, errors.New("invalid credentials")
 	}
 

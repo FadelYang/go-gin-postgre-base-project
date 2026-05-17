@@ -86,6 +86,7 @@ func (h *AuthHandler) Login(ctx *gin.Context) {
 				"errors": fmt.Sprintf("%s: %s", "failed to login an account", err.Error()),
 			},
 		)
+		return
 	}
 
 	response, code, err := h.authUsecase.Login(ctx.Request.Context(), loginForm)
@@ -96,11 +97,13 @@ func (h *AuthHandler) Login(ctx *gin.Context) {
 				"errors": fmt.Sprintf("%s: %s", "failed to login an account", err.Error()),
 			},
 		)
+		return
 	}
 
 	ctx.JSON(
 		code,
 		common.BaseResponse[authDTO.LoginResponse]{
+			Status:  code,
 			Message: "login success",
 			Data:    *response,
 		},
