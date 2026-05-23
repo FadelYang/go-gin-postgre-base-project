@@ -48,22 +48,24 @@ func (r *authRepository) Register(form dto.RegisterDTO) (code int, err error) {
 }
 
 func (r *authRepository) Login(ctx context.Context, form dto.LoginDTO) (passwordHash string, code int, err error) {
-	var checkIsExistsQuery string
+	var key string
 
 	switch form.ChoosenKey {
 	case "email":
-		checkIsExistsQuery = qGetPasswordHashByEmail
+		key = "email"
 	case "phonenumber":
-		checkIsExistsQuery = qGetPasswordHashByPhoneNumber
+		key = "phonenumber"
 	case "username":
-		checkIsExistsQuery = qGetPasswordHashByUsername
+		key = "username"
 	default:
 		return "", http.StatusBadRequest, errors.New("unknown login method")
 	}
 
+	getQuery := fmt.Sprintf(qGetHashedPasswordByKey, key)
+
 	if err := r.db.WithContext(ctx).
 		Raw(
-			checkIsExistsQuery,
+			getQuery,
 			form.Key,
 		).Scan(&passwordHash).Error; err != nil {
 		return "", http.StatusBadRequest, err
