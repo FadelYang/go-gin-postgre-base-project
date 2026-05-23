@@ -252,6 +252,15 @@ func (u *authUsecase) RefreshLogin(ctx context.Context, refreshToken string) (ne
 		return nil, errors.New("invalid token type")
 	}
 
+	userDetail, err := u.userRepo.FindByID(ctx, claims.UserID)
+	if err != nil {
+		return nil, err
+	}
+
+	if userDetail.TokenVersion != int(claims.Version) {
+		return nil, errors.New("token already revoked")
+	}
+
 	redisKey := fmt.Sprintf(
 		"refresh_token:%s:%s",
 		claims.UserID,
