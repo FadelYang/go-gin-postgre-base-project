@@ -14,6 +14,7 @@ type User struct {
 	FirstName    string    `gorm:"not null"`
 	LastName     string    `gorm:""`
 	PasswordHash string    `gorm:"not null"`
+	TokenVersion int       `gorm:""`
 	CreatedAt    time.Time `gorm:"autoCreateTime"`
 	UpdatedAt    time.Time `gorm:"autoUpdateTime"`
 }

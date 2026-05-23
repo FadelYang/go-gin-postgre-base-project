@@ -6,7 +6,7 @@ CREATE TABLE users (
     first_name VARCHAR(50) NOT NULL,
     last_name VARCHAR(50),
     password_hash VARCHAR(255) NOT NULL,
-    token_version INTEGER NOT NULL,
+    token_version INTEGER NULL,
     created_at TIMESTAMP DEFAULT now(),
     updated_at TIMESTAMP DEFAULT now()
 );

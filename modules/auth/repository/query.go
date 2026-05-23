@@ -12,6 +12,7 @@ const (
 		WHERE 
 	`
 
+	// TODO: Fix this, this query are duplicate, just create the baseQuery and add the where value based on if else the login type.
 	qGetPasswordHashByEmail = `
 		SELECT password_hash
 		FROM users
@@ -28,5 +29,12 @@ const (
 		SELECT password_hash
 		FROM users
 		WHERE username = $1
+	`
+
+	qBaseUpdateTokenVersion = `
+		UPDATE users
+		SET token_version = token_verion + 1
+		WHERE %s = $1 
+		RETURNING token_version
 	`
 )

@@ -46,8 +46,6 @@ func (h *AuthHandler) Register(ctx *gin.Context) {
 			return
 		}
 
-		fmt.Printf("errors: %+v", err)
-
 		ctx.JSON(http.StatusBadRequest, gin.H{"errors": fmt.Sprintf("%s: %s", "failed to create a new account", err.Error())})
 		return
 	}

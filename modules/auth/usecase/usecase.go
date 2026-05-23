@@ -133,7 +133,7 @@ func (u *authUsecase) Login(ctx context.Context, form dto.LoginDTO) (response *d
 		}
 	}
 
-	hashedPassword, code, err := u.authRepo.Login(form)
+	hashedPassword, code, err := u.authRepo.Login(ctx, form)
 	if err != nil {
 		return nil, code, err
 	}
@@ -147,7 +147,7 @@ func (u *authUsecase) Login(ctx context.Context, form dto.LoginDTO) (response *d
 	generateTokenPayload := model.GenerateTokenPayload{
 		UserID:    user.ID,
 		SessionID: sessionID,
-		Version:   1,
+		Version:   uint(user.TokenVersion),
 	}
 
 	accessToken, err := u.generateAccessToken(generateTokenPayload)

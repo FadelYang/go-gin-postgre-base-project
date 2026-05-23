@@ -1,7 +1,9 @@
 package repository
 
 import (
+	"context"
 	"errors"
+	"fmt"
 	"net/http"
 	"project-root/modules/auth/dto"
 
@@ -10,7 +12,8 @@ import (
 
 type AuthRepository interface {
 	Register(form dto.RegisterDTO) (code int, err error)
-	Login(form dto.LoginDTO) (passwordHash string, code int, err error)
+	Login(ctx context.Context, form dto.LoginDTO) (passwordHash string, code int, err error)
+	UpdateTokenVersion(ctx context.Context, form dto.LoginDTO) (updatedVersion int, code int, err error)
 }
 
 type authRepository struct {
@@ -44,7 +47,7 @@ func (r *authRepository) Register(form dto.RegisterDTO) (code int, err error) {
 	return http.StatusCreated, nil
 }
 
-func (r *authRepository) Login(form dto.LoginDTO) (passwordHash string, code int, err error) {
+func (r *authRepository) Login(ctx context.Context, form dto.LoginDTO) (passwordHash string, code int, err error) {
 	var checkIsExistsQuery string
 
 	switch form.ChoosenKey {
@@ -58,10 +61,11 @@ func (r *authRepository) Login(form dto.LoginDTO) (passwordHash string, code int
 		return "", http.StatusBadRequest, errors.New("unknown login method")
 	}
 
-	if err := r.db.Raw(
-		checkIsExistsQuery,
-		form.Key,
-	).Scan(&passwordHash).Error; err != nil {
+	if err := r.db.WithContext(ctx).
+		Raw(
+			checkIsExistsQuery,
+			form.Key,
+		).Scan(&passwordHash).Error; err != nil {
 		return "", http.StatusBadRequest, err
 	}
 
@@ -70,4 +74,32 @@ func (r *authRepository) Login(form dto.LoginDTO) (passwordHash string, code int
 	}
 
 	return passwordHash, http.StatusOK, nil
+}
+
+func (r *authRepository) UpdateTokenVersion(ctx context.Context, form dto.LoginDTO) (updatedVersion int, code int, err error) {
+	var whereField string
+	var updatedTokenVersion int
+
+	switch form.ChoosenKey {
+	case "username":
+		whereField = "username"
+	case "email":
+		whereField = "email"
+	case "phonenumber":
+		whereField = "phonenumber"
+	default:
+		return 0, http.StatusBadRequest, errors.New("unknown login method")
+	}
+
+	updateQuery := fmt.Sprintf(qBaseUpdateTokenVersion, whereField)
+
+	if err := r.db.WithContext(ctx).
+		Raw(
+			updateQuery,
+			form.Key,
+		).Scan(&updatedTokenVersion).Error; err != nil {
+		return 0, http.StatusBadRequest, err
+	}
+
+	return updatedTokenVersion, http.StatusOK, nil
 }
