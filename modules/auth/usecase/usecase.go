@@ -117,17 +117,17 @@ func (u *authUsecase) Login(ctx context.Context, form dto.LoginDTO) (response *d
 
 	switch form.ChoosenKey {
 	case "email":
-		user, err = u.userRepo.FindByEmail(form.Key)
+		user, err = u.userRepo.FindByEmail(ctx, form.Key)
 		if err != nil {
 			return nil, http.StatusBadRequest, err
 		}
 	case "username":
-		user, err = u.userRepo.FindByUsername(form.Key)
+		user, err = u.userRepo.FindByUsername(ctx, form.Key)
 		if err != nil {
 			return nil, http.StatusBadRequest, err
 		}
 	case "phonenumber":
-		user, err = u.userRepo.FindByPhonenumber(form.Key)
+		user, err = u.userRepo.FindByPhonenumber(ctx, form.Key)
 		if err != nil {
 			return nil, http.StatusBadRequest, err
 		}

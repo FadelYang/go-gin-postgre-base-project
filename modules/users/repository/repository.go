@@ -13,10 +13,10 @@ type UserRepository interface {
 	Create(ctx context.Context, user model.User) (model.User, error)
 	Update(user model.User) (model.User, error)
 	Delete(id uuid.UUID) error
-	FindByID(id uuid.UUID) (model.User, error)
-	FindByEmail(email string) (model.User, error)
-	FindByUsername(username string) (model.User, error)
-	FindByPhonenumber(phonenumber string) (model.User, error)
+	FindByID(ctx context.Context, id uuid.UUID) (model.User, error)
+	FindByEmail(ctx context.Context, email string) (model.User, error)
+	FindByUsername(ctx context.Context, username string) (model.User, error)
+	FindByPhonenumber(ctx context.Context, phonenumber string) (model.User, error)
 }
 
 type userRepository struct {
@@ -68,36 +68,36 @@ func (r *userRepository) Delete(id uuid.UUID) error {
 	return nil
 }
 
-func (r *userRepository) FindByID(id uuid.UUID) (model.User, error) {
+func (r *userRepository) FindByID(ctx context.Context, id uuid.UUID) (model.User, error) {
 	var user model.User
-	if err := r.db.First(&user, "id = ?", id).Error; err != nil {
+	if err := r.db.WithContext(ctx).First(&user, "id = ?", id).Error; err != nil {
 		return model.User{}, err
 	}
 
 	return user, nil
 }
 
-func (r *userRepository) FindByEmail(email string) (model.User, error) {
+func (r *userRepository) FindByEmail(ctx context.Context, email string) (model.User, error) {
 	var user model.User
-	if err := r.db.First(&user, "email = ?", email).Error; err != nil {
+	if err := r.db.WithContext(ctx).First(&user, "email = ?", email).Error; err != nil {
 		return model.User{}, err
 	}
 
 	return user, nil
 }
 
-func (r *userRepository) FindByUsername(username string) (model.User, error) {
+func (r *userRepository) FindByUsername(ctx context.Context, username string) (model.User, error) {
 	var user model.User
-	if err := r.db.First(&user, "username = ?", username).Error; err != nil {
+	if err := r.db.WithContext(ctx).First(&user, "username = ?", username).Error; err != nil {
 		return model.User{}, err
 	}
 
 	return user, nil
 }
 
-func (r *userRepository) FindByPhonenumber(phonenumber string) (model.User, error) {
+func (r *userRepository) FindByPhonenumber(ctx context.Context, phonenumber string) (model.User, error) {
 	var user model.User
-	if err := r.db.First(&user, "phonenumber = ?", phonenumber).Error; err != nil {
+	if err := r.db.WithContext(ctx).First(&user, "phonenumber = ?", phonenumber).Error; err != nil {
 		return model.User{}, err
 	}
 
