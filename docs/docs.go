@@ -49,6 +49,40 @@ const docTemplate = `{
                 }
             }
         },
+        "/auth/logout": {
+            "post": {
+                "description": "Logout",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "auth"
+                ],
+                "summary": "Logout",
+                "parameters": [
+                    {
+                        "description": "request body for logout an user [RAW]",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.Logout"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/common.BaseResponse-dto_UserDTO"
+                        }
+                    }
+                }
+            }
+        },
         "/auth/refresh_login": {
             "post": {
                 "description": "Get new access token",
@@ -479,6 +513,20 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "refresh_token": {
+                    "type": "string"
+                }
+            }
+        },
+        "dto.Logout": {
+            "type": "object",
+            "properties": {
+                "refresh_token": {
+                    "type": "string"
+                },
+                "session_id": {
+                    "type": "string"
+                },
+                "user_id": {
                     "type": "string"
                 }
             }

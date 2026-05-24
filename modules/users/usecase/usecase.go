@@ -26,10 +26,10 @@ var (
 type UserUsecase interface {
 	GetAll() ([]dto.UserDTO, error)
 	Create(ctx context.Context, user dto.CreateUser) (dto.UserDTO, error)
-	Update(user dto.UpdateUser, userID uuid.UUID) (dto.UserDTO, error)
-	Delete(id uuid.UUID) (dto.UserDTO, error)
-	FindByID(id uuid.UUID) (dto.UserDTO, error)
-	FindByEmail(email string) (dto.UserDTO, error)
+	Update(ctx context.Context, user dto.UpdateUser, userID uuid.UUID) (dto.UserDTO, error)
+	Delete(ctx context.Context, id uuid.UUID) (dto.UserDTO, error)
+	FindByID(ctx context.Context, id uuid.UUID) (dto.UserDTO, error)
+	FindByEmail(ctx context.Context, email string) (dto.UserDTO, error)
 }
 
 type userUsecase struct {
@@ -101,8 +101,8 @@ func (s *userUsecase) Create(ctx context.Context, form dto.CreateUser) (dto.User
 	}, nil
 }
 
-func (s *userUsecase) Update(user dto.UpdateUser, userID uuid.UUID) (dto.UserDTO, error) {
-	existData, err := s.userRepo.FindByID(userID)
+func (s *userUsecase) Update(ctx context.Context, user dto.UpdateUser, userID uuid.UUID) (dto.UserDTO, error) {
+	existData, err := s.userRepo.FindByID(ctx, userID)
 	if err != nil {
 		return dto.UserDTO{}, err
 	}
@@ -137,8 +137,8 @@ func (s *userUsecase) Update(user dto.UpdateUser, userID uuid.UUID) (dto.UserDTO
 	}, nil
 }
 
-func (s *userUsecase) Delete(id uuid.UUID) (dto.UserDTO, error) {
-	userToDelete, err := s.FindByID(id)
+func (s *userUsecase) Delete(ctx context.Context, id uuid.UUID) (dto.UserDTO, error) {
+	userToDelete, err := s.FindByID(ctx, id)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return dto.UserDTO{}, ErrUserNotFound
@@ -154,8 +154,8 @@ func (s *userUsecase) Delete(id uuid.UUID) (dto.UserDTO, error) {
 	return userToDelete, nil
 }
 
-func (s *userUsecase) FindByID(id uuid.UUID) (dto.UserDTO, error) {
-	user, err := s.userRepo.FindByID(id)
+func (s *userUsecase) FindByID(ctx context.Context, id uuid.UUID) (dto.UserDTO, error) {
+	user, err := s.userRepo.FindByID(ctx, id)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return dto.UserDTO{}, ErrUserNotFound
@@ -173,8 +173,8 @@ func (s *userUsecase) FindByID(id uuid.UUID) (dto.UserDTO, error) {
 	}, nil
 }
 
-func (s *userUsecase) FindByEmail(email string) (dto.UserDTO, error) {
-	user, err := s.userRepo.FindByEmail(email)
+func (s *userUsecase) FindByEmail(ctx context.Context, email string) (dto.UserDTO, error) {
+	user, err := s.userRepo.FindByEmail(ctx, email)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return dto.UserDTO{}, ErrUserNotFound

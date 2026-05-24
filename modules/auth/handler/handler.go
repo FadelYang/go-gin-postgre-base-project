@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/http"
 	"project-root/common"
+	"project-root/modules/auth/dto"
 	authDTO "project-root/modules/auth/dto"
 	"project-root/modules/auth/usecase"
 	userDTO "project-root/modules/users/dto"
@@ -137,6 +138,41 @@ func (h *AuthHandler) RefreshLogin(ctx *gin.Context) {
 				AccessToken:  *generatedAccessToken,
 				RefreshToken: token.RefreshToken,
 			},
+		},
+	)
+}
+
+// @Tags 					auth
+// @Summary				Logout
+// @Description 	Logout
+// @Accept 				json
+// @Produce 			json
+// @Success				200 {object} common.BaseResponse[userDTO.UserDTO]
+// @Router				/auth/logout [post]
+// @Param					request body dto.Logout true "request body for logout an user [RAW]"
+func (h *AuthHandler) Logout(ctx *gin.Context) {
+	var form dto.Logout
+	if err := ctx.ShouldBindBodyWithJSON(&form); err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{
+			"errors": fmt.Sprintf("%s: %s", "failed to logout user session: ", err),
+		})
+		return
+	}
+
+	code, err := h.authUsecase.Logout(ctx, form)
+	if err != nil {
+		ctx.JSON(code, gin.H{
+			"errors": fmt.Sprintf("%s: %s", "failed to logout user session: ", err),
+		})
+		return
+	}
+
+	ctx.JSON(
+		code,
+		common.BaseResponse[authDTO.LoginDTO]{
+			Status:  code,
+			Message: "logout success",
+			// Data:    ,
 		},
 	)
 }
