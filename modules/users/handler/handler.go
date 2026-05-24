@@ -117,7 +117,7 @@ func (c *UserHandler) Update(ctx *gin.Context) {
 		return
 	}
 
-	updatedUser, err := c.userUsecase.Update(user, parsedUUID)
+	updatedUser, err := c.userUsecase.Update(ctx.Request.Context(), user, parsedUUID)
 	if err != nil {
 		log.Printf("Failed to update user: %v", err)
 
@@ -159,7 +159,7 @@ func (c *UserHandler) Delete(ctx *gin.Context) {
 		return
 	}
 
-	deletedUser, err := c.userUsecase.Delete(parsedUUID)
+	deletedUser, err := c.userUsecase.Delete(ctx.Request.Context(), parsedUUID)
 	if err != nil {
 		log.Printf("Failed to delete user: %v", err)
 
@@ -201,7 +201,7 @@ func (c *UserHandler) GetByID(ctx *gin.Context) {
 		return
 	}
 
-	user, err := c.userUsecase.FindByID(parsedUUID)
+	user, err := c.userUsecase.FindByID(ctx.Request.Context(), parsedUUID)
 	if err != nil {
 		log.Printf("Failed to find user with id %s: %v", parsedUUID, err)
 
@@ -230,7 +230,7 @@ func (c *UserHandler) GetByID(ctx *gin.Context) {
 func (c *UserHandler) GetByEmail(ctx *gin.Context) {
 	email := ctx.Param("email")
 
-	user, err := c.userUsecase.FindByEmail(email)
+	user, err := c.userUsecase.FindByEmail(ctx, email)
 	if err != nil {
 		log.Printf("Failed to find user with email %s: %v", email, err)
 

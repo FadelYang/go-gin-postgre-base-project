@@ -89,6 +89,8 @@ func (r *authRepository) UpdateTokenVersion(ctx context.Context, form dto.LoginD
 		whereField = "email"
 	case "phonenumber":
 		whereField = "phonenumber"
+	case "userid":
+		whereField = "id"
 	default:
 		return 0, http.StatusBadRequest, errors.New("unknown login method")
 	}

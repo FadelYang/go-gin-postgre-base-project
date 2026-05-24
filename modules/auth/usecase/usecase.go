@@ -31,6 +31,7 @@ type AuthUsecase interface {
 	Register(ctx context.Context, form userDTO.CreateUser) (createdUser *userModel.User, err error)
 	Login(ctx context.Context, form dto.LoginDTO) (response *dto.LoginResponse, code int, err error)
 	RefreshLogin(ctx context.Context, refteshToken string) (newAccessToken *string, err error)
+	Logout(ctx context.Context, form dto.Logout) (code int, err error)
 }
 
 type authUsecase struct {
@@ -231,7 +232,7 @@ func (u *authUsecase) generateRefreshToken(payload model.GenerateTokenPayload) (
 	return signedToken, nil
 }
 
-func (u *authUsecase) RefreshLogin(ctx context.Context, refreshToken string) (newAccessToken *string, err error) {
+func (u authUsecase) parseRefreshToken(ctx context.Context, refreshToken string) (parsedToken *jwt.Token, err error) {
 	token, err := jwt.ParseWithClaims(
 		refreshToken,
 		&dto.RefreshTokenClaim{},
@@ -242,6 +243,15 @@ func (u *authUsecase) RefreshLogin(ctx context.Context, refreshToken string) (ne
 			return refreshSecret, nil
 		},
 	)
+	if err != nil {
+		return nil, err
+	}
+
+	return token, nil
+}
+
+func (u *authUsecase) RefreshLogin(ctx context.Context, refreshToken string) (newAccessToken *string, err error) {
+	token, err := u.parseRefreshToken(ctx, refreshToken)
 	if err != nil {
 		return nil, err
 	}
@@ -290,4 +300,33 @@ func (u *authUsecase) RefreshLogin(ctx context.Context, refreshToken string) (ne
 	}
 
 	return &accessToken, nil
+}
+
+func (u *authUsecase) Logout(ctx context.Context, form dto.Logout) (code int, err error) {
+	token, err := u.parseRefreshToken(ctx, form.RefreshToken)
+	if err != nil {
+		return http.StatusBadRequest, err
+	}
+
+	claims := token.Claims.(*dto.RefreshTokenClaim)
+
+	redisKey := fmt.Sprintf(
+		"refresh_token:%s:%s",
+		claims.UserID,
+		claims.SessionID,
+	)
+
+	u.RedisClient.Del(ctx, redisKey)
+
+	updateTokenVersionPayload := dto.LoginDTO{
+		Key:        claims.UserID.String(),
+		ChoosenKey: "userid",
+	}
+
+	_, code, err = u.authRepo.UpdateTokenVersion(ctx, updateTokenVersionPayload)
+	if err != nil {
+		return code, err
+	}
+
+	return code, nil
 }
