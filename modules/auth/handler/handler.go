@@ -99,12 +99,32 @@ func (h *AuthHandler) Login(ctx *gin.Context) {
 		return
 	}
 
+	ctx.SetCookie(
+		"refresh_token",
+		response.RefreshToken,
+		60*60*24*7,
+		"/",
+		"",
+		true,
+		true,
+	)
+
+	ctx.SetCookie(
+		"access_token",
+		response.AccessToken,
+		60*15,
+		"/",
+		"",
+		true,
+		true,
+	)
+
 	ctx.JSON(
 		code,
 		common.BaseResponse[authDTO.LoginResponse]{
 			Status:  code,
 			Message: "login success",
-			Data:    *response,
+			// Data:    *response,
 		},
 	)
 }
@@ -166,6 +186,26 @@ func (h *AuthHandler) Logout(ctx *gin.Context) {
 		})
 		return
 	}
+
+	ctx.SetCookie(
+		"refresh_token",
+		"",
+		-1,
+		"/",
+		"",
+		true,
+		true,
+	)
+
+	ctx.SetCookie(
+		"access_token",
+		"",
+		-1,
+		"/",
+		"",
+		true,
+		true,
+	)
 
 	ctx.JSON(
 		code,
