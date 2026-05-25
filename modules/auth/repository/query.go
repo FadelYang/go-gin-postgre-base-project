@@ -20,7 +20,7 @@ const (
 
 	qBaseUpdateTokenVersion = `
 		UPDATE users
-		SET token_version = token_verion + 1
+		SET token_version = token_version + 1
 		WHERE %s = $1 
 		RETURNING token_version
 	`

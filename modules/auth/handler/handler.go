@@ -121,10 +121,10 @@ func (h *AuthHandler) Login(ctx *gin.Context) {
 
 	ctx.JSON(
 		code,
-		common.BaseResponse[authDTO.LoginResponse]{
+		common.BaseResponse[any]{
 			Status:  code,
 			Message: "login success",
-			// Data:    *response,
+			Data:    nil,
 		},
 	)
 }
@@ -137,8 +137,13 @@ func (h *AuthHandler) Login(ctx *gin.Context) {
 // @Success				200 {object} common.BaseResponse[authDTO.LoginResponse]
 // @Router				/auth/refresh_login [post]
 func (h *AuthHandler) RefreshLogin(ctx *gin.Context) {
-	refreshToken, _ := h.getTokenFromCookie(ctx)
-
+	refreshToken, _, err := h.getTokenFromCookie(ctx)
+	if err != nil {
+		ctx.JSON(http.StatusUnauthorized, gin.H{
+			"errors": err.Error(),
+		})
+		return
+	}
 	generatedAccessToken, err := h.authUsecase.RefreshLogin(ctx.Request.Context(), refreshToken)
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"errors": fmt.Sprintf("%s: %s", "failed to generate new access token", err.Error())})
@@ -166,7 +171,13 @@ func (h *AuthHandler) RefreshLogin(ctx *gin.Context) {
 // @Success				200 {object} common.BaseResponse[userDTO.UserDTO]
 // @Router				/auth/logout [post]
 func (h *AuthHandler) Logout(ctx *gin.Context) {
-	refreshToken, accessToken := h.getTokenFromCookie(ctx)
+	refreshToken, accessToken, err := h.getTokenFromCookie(ctx)
+	if err != nil {
+		ctx.JSON(http.StatusUnauthorized, gin.H{
+			"errors": err.Error(),
+		})
+		return
+	}
 
 	form := dto.Logout{
 		RefreshToken: refreshToken,
@@ -203,28 +214,24 @@ func (h *AuthHandler) Logout(ctx *gin.Context) {
 
 	ctx.JSON(
 		code,
-		common.BaseResponse[authDTO.LoginDTO]{
+		common.BaseResponse[any]{
 			Status:  code,
 			Message: "logout success",
-			// Data:    ,
+			Data:    nil,
 		},
 	)
 }
 
-func (h AuthHandler) getTokenFromCookie(ctx *gin.Context) (string, string) {
+func (h AuthHandler) getTokenFromCookie(ctx *gin.Context) (string, string, error) {
 	refreshToken, err := ctx.Cookie("refresh_token")
 	if err != nil {
-		ctx.JSON(http.StatusUnauthorized, gin.H{
-			"errors": err.Error(),
-		})
+		return "", "", errors.New("refresh_token not found")
 	}
 
 	accessToken, err := ctx.Cookie("access_token")
 	if err != nil {
-		ctx.JSON(http.StatusUnauthorized, gin.H{
-			"errors": err.Error(),
-		})
+		return "", "", errors.New("access_token not found")
 	}
 
-	return refreshToken, accessToken
+	return refreshToken, accessToken, nil
 }
