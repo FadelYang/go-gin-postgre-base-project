@@ -169,14 +169,24 @@ func (h *AuthHandler) RefreshLogin(ctx *gin.Context) {
 // @Produce 			json
 // @Success				200 {object} common.BaseResponse[userDTO.UserDTO]
 // @Router				/auth/logout [post]
-// @Param					request body dto.Logout true "request body for logout an user [RAW]"
 func (h *AuthHandler) Logout(ctx *gin.Context) {
-	var form dto.Logout
-	if err := ctx.ShouldBindBodyWithJSON(&form); err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{
-			"errors": fmt.Sprintf("%s: %s", "failed to logout user session: ", err),
+	refreshToken, err := ctx.Cookie("refresh_token")
+	if err != nil {
+		ctx.JSON(http.StatusUnauthorized, gin.H{
+			"errors": err.Error(),
 		})
-		return
+	}
+
+	accessToken, err := ctx.Cookie("access_token")
+	if err != nil {
+		ctx.JSON(http.StatusUnauthorized, gin.H{
+			"errors": err.Error(),
+		})
+	}
+
+	form := dto.Logout{
+		RefreshToken: refreshToken,
+		AccessToken:  accessToken,
 	}
 
 	code, err := h.authUsecase.Logout(ctx, form)

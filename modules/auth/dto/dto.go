@@ -41,7 +41,6 @@ type RefreshAccessToken struct {
 }
 
 type Logout struct {
-	SessionID    uuid.UUID `json:"session_id"`
-	UserID       uuid.UUID `json:"user_id"`
-	RefreshToken string    `json:"refresh_token"`
+	RefreshToken string `json:"refresh_token"`
+	AccessToken  string `json:"access_token"`
 }
