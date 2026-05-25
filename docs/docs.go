@@ -62,17 +62,6 @@ const docTemplate = `{
                     "auth"
                 ],
                 "summary": "Logout",
-                "parameters": [
-                    {
-                        "description": "request body for logout an user [RAW]",
-                        "name": "request",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/dto.Logout"
-                        }
-                    }
-                ],
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -96,17 +85,6 @@ const docTemplate = `{
                     "auth"
                 ],
                 "summary": "Refresh Login",
-                "parameters": [
-                    {
-                        "description": "request body for get new access token [RAW]",
-                        "name": "request",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/dto.RefreshAccessToken"
-                        }
-                    }
-                ],
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -512,28 +490,6 @@ const docTemplate = `{
                 "access_token": {
                     "type": "string"
                 },
-                "refresh_token": {
-                    "type": "string"
-                }
-            }
-        },
-        "dto.Logout": {
-            "type": "object",
-            "properties": {
-                "refresh_token": {
-                    "type": "string"
-                },
-                "session_id": {
-                    "type": "string"
-                },
-                "user_id": {
-                    "type": "string"
-                }
-            }
-        },
-        "dto.RefreshAccessToken": {
-            "type": "object",
-            "properties": {
                 "refresh_token": {
                     "type": "string"
                 }

@@ -81,20 +81,6 @@ definitions:
       refresh_token:
         type: string
     type: object
-  dto.Logout:
-    properties:
-      refresh_token:
-        type: string
-      session_id:
-        type: string
-      user_id:
-        type: string
-    type: object
-  dto.RefreshAccessToken:
-    properties:
-      refresh_token:
-        type: string
-    type: object
   dto.UpdateUser:
     properties:
       email:
@@ -164,13 +150,6 @@ paths:
       consumes:
       - application/json
       description: Logout
-      parameters:
-      - description: request body for logout an user [RAW]
-        in: body
-        name: request
-        required: true
-        schema:
-          $ref: '#/definitions/dto.Logout'
       produces:
       - application/json
       responses:
@@ -186,13 +165,6 @@ paths:
       consumes:
       - application/json
       description: Get new access token
-      parameters:
-      - description: request body for get new access token [RAW]
-        in: body
-        name: request
-        required: true
-        schema:
-          $ref: '#/definitions/dto.RefreshAccessToken'
       produces:
       - application/json
       responses:
