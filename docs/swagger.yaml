@@ -233,6 +233,21 @@ paths:
       summary: Post Example
       tags:
       - examples
+  /examples/auth:
+    get:
+      consumes:
+      - application/json
+      description: get all example data
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/common.BaseResponse-dto_ExampleDTO'
+      summary: Get Example With Auth
+      tags:
+      - examples
   /users:
     get:
       consumes:

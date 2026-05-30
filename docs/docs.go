@@ -184,6 +184,29 @@ const docTemplate = `{
                 }
             }
         },
+        "/examples/auth": {
+            "get": {
+                "description": "get all example data",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "examples"
+                ],
+                "summary": "Get Example With Auth",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/common.BaseResponse-dto_ExampleDTO"
+                        }
+                    }
+                }
+            }
+        },
         "/users": {
             "get": {
                 "description": "get all users",
