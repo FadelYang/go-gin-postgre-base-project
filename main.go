@@ -2,7 +2,9 @@ package main
 
 import (
 	"fmt"
+	"os"
 	"project-root/config"
+	"project-root/internal/services"
 	"project-root/modules/examples/model"
 	"project-root/providers"
 	"project-root/routes"
@@ -21,12 +23,16 @@ func main() {
 
 	db := config.InitDB()
 	redis := config.InitRedis()
+	jwtService := services.NewJWTService(
+		os.Getenv("ACCESS_SECRET_KEY"),
+		os.Getenv("REFRESH_SECRET_KEY"),
+	)
 
 	db.AutoMigrate(&model.Example{})
 
 	p := providers.Init(db, redis)
 	r := gin.Default()
-	routes.InitRoutes(r, p)
+	routes.InitRoutes(r, p, jwtService)
 
 	port := 8000
 	fmt.Printf("Server running at port %d\n", port)

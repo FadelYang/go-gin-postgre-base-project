@@ -12,6 +12,13 @@ type JWTService struct {
 	refreshSecret string
 }
 
+func NewJWTService(accessSecret string, refreshSecret string) *JWTService {
+	return &JWTService{
+		accessSecret:  accessSecret,
+		refreshSecret: refreshSecret,
+	}
+}
+
 func (s *JWTService) ValidateAccessToken(
 	tokenString string,
 ) (*dto.AccessTokenClaim, error) {

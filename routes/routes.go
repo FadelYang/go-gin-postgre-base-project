@@ -1,6 +1,7 @@
 package routes
 
 import (
+	"project-root/internal/services"
 	"project-root/providers"
 
 	"github.com/gin-gonic/gin"
@@ -13,12 +14,12 @@ import (
 	ginSwagger "github.com/swaggo/gin-swagger"
 )
 
-func InitRoutes(r *gin.Engine, p *providers.Providers) {
+func InitRoutes(r *gin.Engine, p *providers.Providers, jwtService *services.JWTService) {
 	api := r.Group("api/v1")
 
 	api.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
-	ex.RegisterRoutes(api, p.Examples)
+	ex.RegisterRoutes(api, p.Examples, jwtService)
 	users.RegisterRoutes(api, p.Users)
 	auth.RegisterRoutes(api, p.Auth)
 }

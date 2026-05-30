@@ -54,6 +54,24 @@ func (c *ExampleHandler) GetExamples(ctx *gin.Context) {
 }
 
 // @Tags 					examples
+// @Summary				Get Example With Auth
+// @Description 	get all example data
+// @Accept 				json
+// @Produce 			json
+// @Success				200 {object} common.BaseResponse[dto.ExampleDTO]
+// @Router				/examples/auth [get]
+func (c *ExampleHandler) GetExampleWithAuth(ctx *gin.Context) {
+	ctx.JSON(
+		http.StatusOK,
+		common.BaseResponse[any]{
+			Status:  http.StatusOK,
+			Message: "success get example endpoint that guarded with auth",
+			Data:    nil,
+		},
+	)
+}
+
+// @Tags 					examples
 // @Summary				Post Example
 // @Description 	create an example
 // @Accept 				json
