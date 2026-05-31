@@ -18,6 +18,9 @@ import (
 // @version				1.0
 // @description 	Go, Gin, and Postgre Base Project
 // @BasePath			/api/v1
+// @securityDefinitions.apikey BearerAuth
+// @in header
+// @name Authorization
 func main() {
 	config.InitEnv()
 
@@ -30,7 +33,7 @@ func main() {
 
 	db.AutoMigrate(&model.Example{})
 
-	p := providers.Init(db, redis)
+	p := providers.Init(db, redis, jwtService)
 	r := gin.Default()
 	routes.InitRoutes(r, p, jwtService)
 

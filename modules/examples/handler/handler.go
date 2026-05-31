@@ -58,6 +58,7 @@ func (c *ExampleHandler) GetExamples(ctx *gin.Context) {
 // @Description 	get all example data
 // @Accept 				json
 // @Produce 			json
+// @Security 			BearerAuth
 // @Success				200 {object} common.BaseResponse[dto.ExampleDTO]
 // @Router				/examples/auth [get]
 func (c *ExampleHandler) GetExampleWithAuth(ctx *gin.Context) {

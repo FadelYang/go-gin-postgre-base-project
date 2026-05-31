@@ -5,7 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
-	"os"
+	"project-root/internal/services"
 	"project-root/modules/auth/dto"
 	"project-root/modules/auth/model"
 	"project-root/modules/auth/repository"
@@ -15,16 +15,10 @@ import (
 	"project-root/tools"
 	"time"
 
-	"github.com/golang-jwt/jwt/v5"
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgconn"
 	"github.com/redis/go-redis/v9"
 	"golang.org/x/crypto/bcrypt"
-)
-
-var (
-	accessSecret  = []byte(os.Getenv("ACCESS_SECRET_KEY"))
-	refreshSecret = []byte(os.Getenv("REFRESH_SECRET_KEY"))
 )
 
 type AuthUsecase interface {
@@ -38,17 +32,20 @@ type authUsecase struct {
 	RedisClient redis.Client
 	authRepo    repository.AuthRepository
 	userRepo    userRepository.UserRepository
+	jwtService  *services.JWTService
 }
 
 func NewAuthUsecase(
 	redisClient *redis.Client,
 	authRepo repository.AuthRepository,
 	userRepo userRepository.UserRepository,
+	jwtService *services.JWTService,
 ) AuthUsecase {
 	return &authUsecase{
 		RedisClient: *redisClient,
 		authRepo:    authRepo,
 		userRepo:    userRepo,
+		jwtService:  jwtService,
 	}
 }
 
@@ -151,12 +148,12 @@ func (u *authUsecase) Login(ctx context.Context, form dto.LoginDTO) (response *d
 		Version:   uint(user.TokenVersion),
 	}
 
-	accessToken, err := u.generateAccessToken(generateTokenPayload)
+	accessToken, err := u.jwtService.GenerateAccessToken(generateTokenPayload)
 	if err != nil {
 		return nil, http.StatusBadRequest, err
 	}
 
-	refreshToken, err := u.generateRefreshToken(generateTokenPayload)
+	refreshToken, err := u.jwtService.GenerateRefreshToken(generateTokenPayload)
 	if err != nil {
 		return nil, http.StatusBadRequest, err
 	}
@@ -185,73 +182,8 @@ func (u *authUsecase) Login(ctx context.Context, form dto.LoginDTO) (response *d
 	}, http.StatusOK, nil
 }
 
-func (u *authUsecase) generateAccessToken(payload model.GenerateTokenPayload) (string, error) {
-	jti := uuid.NewString()
-
-	claims := dto.AccessTokenClaim{
-		UserID: payload.UserID,
-		RegisteredClaims: jwt.RegisteredClaims{
-			ID:        jti,
-			ExpiresAt: jwt.NewNumericDate(time.Now().Add(1 * 15 * time.Minute)),
-			IssuedAt:  jwt.NewNumericDate(time.Now()),
-		},
-	}
-
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-
-	signedToken, err := token.SignedString(accessSecret)
-	if err != nil {
-		return "", err
-	}
-
-	return signedToken, nil
-}
-
-func (u *authUsecase) generateRefreshToken(payload model.GenerateTokenPayload) (string, error) {
-	jti := uuid.NewString()
-
-	claims := dto.RefreshTokenClaim{
-		UserID:    payload.UserID,
-		SessionID: payload.SessionID,
-		Version:   payload.Version,
-		Type:      "refresh",
-		RegisteredClaims: jwt.RegisteredClaims{
-			ID:        jti,
-			ExpiresAt: jwt.NewNumericDate(time.Now().Add(7 * 24 * time.Hour)),
-			IssuedAt:  jwt.NewNumericDate(time.Now()),
-		},
-	}
-
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-
-	signedToken, err := token.SignedString(refreshSecret)
-	if err != nil {
-		return "", err
-	}
-
-	return signedToken, nil
-}
-
-func (u authUsecase) parseRefreshToken(ctx context.Context, refreshToken string) (parsedToken *jwt.Token, err error) {
-	token, err := jwt.ParseWithClaims(
-		refreshToken,
-		&dto.RefreshTokenClaim{},
-		func(token *jwt.Token) (any, error) {
-			if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
-				return nil, errors.New("unexpected signing method")
-			}
-			return refreshSecret, nil
-		},
-	)
-	if err != nil {
-		return nil, err
-	}
-
-	return token, nil
-}
-
 func (u *authUsecase) RefreshLogin(ctx context.Context, refreshToken string) (newAccessToken *string, err error) {
-	token, err := u.parseRefreshToken(ctx, refreshToken)
+	token, err := u.jwtService.ParseRefreshToken(ctx, refreshToken)
 	if err != nil {
 		return nil, err
 	}
@@ -294,7 +226,7 @@ func (u *authUsecase) RefreshLogin(ctx context.Context, refreshToken string) (ne
 		Version:   claims.Version,
 	}
 
-	accessToken, err := u.generateAccessToken(accessTokenPayload)
+	accessToken, err := u.jwtService.GenerateAccessToken(accessTokenPayload)
 	if err != nil {
 		return nil, err
 	}
@@ -303,7 +235,7 @@ func (u *authUsecase) RefreshLogin(ctx context.Context, refreshToken string) (ne
 }
 
 func (u *authUsecase) Logout(ctx context.Context, form dto.Logout) (code int, err error) {
-	token, err := u.parseRefreshToken(ctx, form.RefreshToken)
+	token, err := u.jwtService.ParseRefreshToken(ctx, form.RefreshToken)
 	if err != nil {
 		return http.StatusBadRequest, err
 	}

@@ -1,6 +1,7 @@
 package providers
 
 import (
+	"project-root/internal/services"
 	authProvider "project-root/modules/auth/providers"
 	exProvider "project-root/modules/examples/providers"
 	userProvider "project-root/modules/users/providers"
@@ -15,10 +16,10 @@ type Providers struct {
 	Auth     *authProvider.Provider
 }
 
-func Init(db *gorm.DB, redisClient *redis.Client) *Providers {
+func Init(db *gorm.DB, redisClient *redis.Client, jwtService *services.JWTService) *Providers {
 	return &Providers{
 		Examples: exProvider.NewProvider(db),
 		Users:    userProvider.NewProvider(db),
-		Auth:     authProvider.NewProvider(db, redisClient),
+		Auth:     authProvider.NewProvider(db, redisClient, jwtService),
 	}
 }
