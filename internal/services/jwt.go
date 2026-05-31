@@ -106,7 +106,7 @@ func (s *JWTService) ParseRefreshToken(ctx context.Context, refreshToken string)
 			if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 				return nil, errors.New("unexpected signing method")
 			}
-			return s.refreshSecret, nil
+			return []byte(s.refreshSecret), nil
 		},
 	)
 	if err != nil {

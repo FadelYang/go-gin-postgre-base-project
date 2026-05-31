@@ -150,15 +150,22 @@ func (h *AuthHandler) RefreshLogin(ctx *gin.Context) {
 		return
 	}
 
+	ctx.SetCookie(
+		"access_token",
+		*generatedAccessToken,
+		60*15,
+		"/",
+		"",
+		true,
+		true,
+	)
+
 	ctx.JSON(
 		http.StatusCreated,
-		common.BaseResponse[authDTO.LoginResponse]{
+		common.BaseResponse[any]{
 			Status:  http.StatusCreated,
 			Message: "succesfully generated new access token",
-			Data: authDTO.LoginResponse{
-				AccessToken:  *generatedAccessToken,
-				RefreshToken: refreshToken,
-			},
+			Data:    nil,
 		},
 	)
 }
