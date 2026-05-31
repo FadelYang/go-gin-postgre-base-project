@@ -186,6 +186,11 @@ const docTemplate = `{
         },
         "/examples/auth": {
             "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "description": "get all example data",
                 "consumes": [
                     "application/json"
@@ -567,6 +572,13 @@ const docTemplate = `{
                     "example": "budidoremi123"
                 }
             }
+        }
+    },
+    "securityDefinitions": {
+        "BearerAuth": {
+            "type": "apiKey",
+            "name": "Authorization",
+            "in": "header"
         }
     }
 }`
