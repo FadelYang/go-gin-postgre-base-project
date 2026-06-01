@@ -78,6 +78,7 @@ func (r *authRepository) Login(ctx context.Context, form dto.LoginDTO) (password
 	return passwordHash, http.StatusOK, nil
 }
 
+// TODO: refactor it so the users usecase can use it without create a new repo func in their module
 func (r *authRepository) UpdateTokenVersion(ctx context.Context, form dto.LoginDTO) (updatedVersion int, code int, err error) {
 	var whereField string
 	var updatedTokenVersion int

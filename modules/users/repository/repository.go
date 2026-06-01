@@ -2,6 +2,8 @@ package repository
 
 import (
 	"context"
+	"net/http"
+	"project-root/modules/users/dto"
 	"project-root/modules/users/model"
 
 	"github.com/google/uuid"
@@ -17,6 +19,8 @@ type UserRepository interface {
 	FindByEmail(ctx context.Context, email string) (model.User, error)
 	FindByUsername(ctx context.Context, username string) (model.User, error)
 	FindByPhonenumber(ctx context.Context, phonenumber string) (model.User, error)
+	UpdateRole(ctx context.Context, tx *gorm.DB, userID uuid.UUID, payload dto.UpdateUserRole) (int, error)
+	UpdateTokenVersionByUserID(ctx context.Context, tx *gorm.DB, userID uuid.UUID) (int, error)
 }
 
 type userRepository struct {
@@ -102,4 +106,29 @@ func (r *userRepository) FindByPhonenumber(ctx context.Context, phonenumber stri
 	}
 
 	return user, nil
+}
+
+func (r *userRepository) UpdateRole(ctx context.Context, tx *gorm.DB, userID uuid.UUID, payload dto.UpdateUserRole) (int, error) {
+	if err := r.db.WithContext(ctx).
+		Raw(
+			qUpdateUserRole,
+			payload.RoleID,
+			userID,
+		).Error; err != nil {
+		return http.StatusBadRequest, err
+	}
+
+	return http.StatusOK, nil
+}
+
+func (r *userRepository) UpdateTokenVersionByUserID(ctx context.Context, tx *gorm.DB, userID uuid.UUID) (int, error) {
+	if err := r.db.WithContext(ctx).
+		Raw(
+			qUpdateTokenByUserID,
+			userID,
+		).Error; err != nil {
+		return http.StatusBadRequest, err
+	}
+
+	return http.StatusOK, nil
 }

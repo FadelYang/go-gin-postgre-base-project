@@ -34,3 +34,7 @@ type UpdateUser struct {
 	Username string `json:"username" example:"Budi Pambudi"`
 	Email    string `json:"email" example:"budipambudi@gmail.com"`
 }
+
+type UpdateUserRole struct {
+	RoleID uuid.UUID `json:"role_id"`
+}

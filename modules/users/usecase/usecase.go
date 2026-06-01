@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"net/http"
 	"project-root/modules/users/dto"
 	"project-root/modules/users/model"
 	"project-root/modules/users/repository"
@@ -30,14 +31,17 @@ type UserUsecase interface {
 	Delete(ctx context.Context, id uuid.UUID) (dto.UserDTO, error)
 	FindByID(ctx context.Context, id uuid.UUID) (dto.UserDTO, error)
 	FindByEmail(ctx context.Context, email string) (dto.UserDTO, error)
+	UpdateRole(ctx context.Context, userID uuid.UUID, payload dto.UpdateUserRole) (int, error)
 }
 
 type userUsecase struct {
+	db       *gorm.DB
 	userRepo repository.UserRepository
 }
 
-func NewUserUsecase(userRepo repository.UserRepository) UserUsecase {
+func NewUserUsecase(db *gorm.DB, userRepo repository.UserRepository) UserUsecase {
 	return &userUsecase{
+		db:       db,
 		userRepo: userRepo,
 	}
 }
@@ -190,4 +194,34 @@ func (s *userUsecase) FindByEmail(ctx context.Context, email string) (dto.UserDT
 		CreatedAt: user.CreatedAt,
 		UpdatedAt: user.UpdatedAt,
 	}, nil
+}
+
+func (s *userUsecase) UpdateRole(ctx context.Context, userID uuid.UUID, payload dto.UpdateUserRole) (int, error) {
+	tx := s.db.Begin()
+	if tx.Error != nil {
+		return http.StatusBadRequest, tx.Error
+	}
+
+	defer func() {
+		if r := recover(); r != nil {
+			tx.Rollback()
+			panic(r)
+		}
+	}()
+
+	code, err := s.userRepo.UpdateRole(ctx, tx, userID, payload)
+	if err != nil {
+		tx.Rollback()
+		return code, nil
+	}
+
+	code, err = s.userRepo.UpdateTokenVersionByUserID(ctx, tx, userID)
+	if err != nil {
+		tx.Rollback()
+		return code, nil
+	}
+
+	tx.Commit()
+
+	return code, nil
 }

@@ -14,7 +14,7 @@ type Provider struct {
 
 func NewProvider(db *gorm.DB) *Provider {
 	repo := repository.NewuserRepository(db)
-	usecase := usecase.NewUserUsecase(repo)
+	usecase := usecase.NewUserUsecase(db, repo)
 	handler := handler.NewUserHandler(usecase)
 
 	return &Provider{

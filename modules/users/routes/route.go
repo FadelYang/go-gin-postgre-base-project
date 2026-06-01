@@ -15,4 +15,8 @@ func RegisterRoutes(rg *gin.RouterGroup, userProvider *providers.Provider) {
 	exRoutes.DELETE("/:uuid", userProvider.UserHandler.Delete)
 	exRoutes.GET("/:uuid", userProvider.UserHandler.GetByID)
 	exRoutes.GET("/email/:email", userProvider.UserHandler.GetByEmail)
+
+	// TODO: add RBAC middleware
+	// TODO: implement RBAC middleware that only user with superadmin role can update other's role
+	exRoutes.PUT("/:uuid/role", userProvider.UserHandler.UpdateRole)
 }

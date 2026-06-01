@@ -1,6 +1,7 @@
 package model
 
 import (
+	roleModel "project-root/modules/roles/model"
 	"time"
 
 	"github.com/google/uuid"
@@ -17,4 +18,6 @@ type User struct {
 	TokenVersion int       `gorm:""`
 	CreatedAt    time.Time `gorm:"autoCreateTime"`
 	UpdatedAt    time.Time `gorm:"autoUpdateTime"`
+
+	Roles roleModel.Roles `gorm:"roles"`
 }

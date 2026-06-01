@@ -247,3 +247,42 @@ func (c *UserHandler) GetByEmail(ctx *gin.Context) {
 		},
 	)
 }
+
+// @Tags 					users
+// @Summary				Update User Role
+// @Description 	update a role of user
+// @Accept 				json
+// @Produce 			json
+// @Success				201 {object} common.BaseResponse[dto.UserDTO]
+// @Router				/users/{uuid}/roles [put]
+// @Param					uuid path string true "UUID"
+// @Param					request body dto.UpdateUserRole true "request body for update a role of user [RAW]"
+func (c *UserHandler) UpdateRole(ctx *gin.Context) {
+	stringUserUUID := ctx.Param("uuid")
+	parseUserUUID, err := tools.StringToUUID(stringUserUUID)
+	if err != nil {
+		errMsg := fmt.Sprintf("failed to update user role: %v", err)
+
+		log.Println(errMsg)
+		ctx.JSON(http.StatusBadRequest, gin.H{"errors": errMsg})
+		return
+	}
+
+	var updatedRole dto.UpdateUserRole
+	if err := ctx.ShouldBindBodyWithJSON(&updatedRole); err != nil {
+		errMsg := fmt.Sprintf("failed to update user role: %v", err)
+
+		log.Println(errMsg)
+		ctx.JSON(http.StatusBadRequest, gin.H{"errors": errMsg})
+		return
+	}
+
+	code, err := c.userUsecase.UpdateRole(ctx.Request.Context(), parseUserUUID, updatedRole)
+	if err := ctx.ShouldBindBodyWithJSON(&updatedRole); err != nil {
+		errMsg := fmt.Sprintf("failed to update user role: %v", err)
+
+		log.Println(errMsg)
+		ctx.JSON(code, gin.H{"errors": errMsg})
+		return
+	}
+}
