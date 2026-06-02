@@ -25,6 +25,7 @@ type RegisterDTO struct {
 
 type AccessTokenClaim struct {
 	UserID uuid.UUID `json:"user_id"`
+	Role   string    `json:"role"`
 	jwt.RegisteredClaims
 }
 

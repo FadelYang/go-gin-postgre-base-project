@@ -11,9 +11,8 @@ import (
 
 func AuthMiddleware(jwtService services.JWTService) gin.HandlerFunc {
 	return func(c *gin.Context) {
-
 		authHeader := c.GetHeader("Authorization")
-		fmt.Println("authHeader: ", authHeader)
+
 		if authHeader == "" {
 			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{
 				"message": "missing authorization header",
@@ -34,15 +33,14 @@ func AuthMiddleware(jwtService services.JWTService) gin.HandlerFunc {
 
 		claims, err := jwtService.ValidateAccessToken(accessToken)
 		if err != nil {
-			fmt.Printf("[err validate token] %s", err.Error())
+			fmt.Printf("err validate token: %s", err.Error())
 			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{
 				"message": "invalid token",
 			})
 			return
 		}
 
-		// store into gin context
-		c.Set("user_id", claims.UserID)
+		c.Set("claims", claims)
 
 		c.Next()
 	}
