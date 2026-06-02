@@ -20,6 +20,6 @@ func InitRoutes(r *gin.Engine, p *providers.Providers, jwtService *services.JWTS
 	api.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
 	ex.RegisterRoutes(api, p.Examples, jwtService)
-	users.RegisterRoutes(api, p.Users)
+	users.RegisterRoutes(api, p.Users, jwtService)
 	auth.RegisterRoutes(api, p.Auth)
 }

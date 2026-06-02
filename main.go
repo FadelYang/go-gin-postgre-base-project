@@ -31,7 +31,6 @@ func main() {
 		os.Getenv("REFRESH_SECRET_KEY"),
 	)
 
-	// TODO: Implement RBAC to users
 	db.AutoMigrate(&model.Example{})
 
 	p := providers.Init(db, redis, jwtService)

@@ -90,6 +90,11 @@ definitions:
         example: Budi Pambudi
         type: string
     type: object
+  dto.UpdateUserRole:
+    properties:
+      role_id:
+        type: string
+    type: object
   dto.UserDTO:
     properties:
       created_at:
@@ -233,6 +238,23 @@ paths:
       summary: Post Example
       tags:
       - examples
+  /examples/admin-superadmin-only:
+    get:
+      consumes:
+      - application/json
+      description: get all example data
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/common.BaseResponse-dto_ExampleDTO'
+      security:
+      - BearerAuth: []
+      summary: Get Example With Auth
+      tags:
+      - examples
   /examples/auth:
     get:
       consumes:
@@ -351,6 +373,33 @@ paths:
           schema:
             $ref: '#/definitions/common.BaseResponse-dto_UserDTO'
       summary: Update User
+      tags:
+      - users
+  /users/{uuid}/roles:
+    put:
+      consumes:
+      - application/json
+      description: update a role of user
+      parameters:
+      - description: UUID
+        in: path
+        name: uuid
+        required: true
+        type: string
+      - description: request body for update a role of user [RAW]
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.UpdateUserRole'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/common.BaseResponse-dto_UserDTO'
+      summary: Update User Role
       tags:
       - users
   /users/email/{email}:

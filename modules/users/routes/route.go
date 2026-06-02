@@ -1,12 +1,14 @@
 package routes
 
 import (
+	"project-root/internal/services"
+	"project-root/middleware"
 	"project-root/modules/users/providers"
 
 	"github.com/gin-gonic/gin"
 )
 
-func RegisterRoutes(rg *gin.RouterGroup, userProvider *providers.Provider) {
+func RegisterRoutes(rg *gin.RouterGroup, userProvider *providers.Provider, jwtService *services.JWTService) {
 	exRoutes := rg.Group("/users")
 
 	exRoutes.GET("", userProvider.UserHandler.GetAll)
@@ -15,8 +17,9 @@ func RegisterRoutes(rg *gin.RouterGroup, userProvider *providers.Provider) {
 	exRoutes.DELETE("/:uuid", userProvider.UserHandler.Delete)
 	exRoutes.GET("/:uuid", userProvider.UserHandler.GetByID)
 	exRoutes.GET("/email/:email", userProvider.UserHandler.GetByEmail)
-
-	// TODO: add RBAC middleware
-	// TODO: implement RBAC middleware that only user with superadmin role can update other's role
-	exRoutes.PUT("/:uuid/role", userProvider.UserHandler.UpdateRole)
+	exRoutes.PUT("/:uuid/role",
+		middleware.AuthMiddleware(*jwtService),
+		middleware.RBACMiddleware(*jwtService, []string{"superamdin"}),
+		userProvider.UserHandler.UpdateRole,
+	)
 }

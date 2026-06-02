@@ -184,6 +184,34 @@ const docTemplate = `{
                 }
             }
         },
+        "/examples/admin-superadmin-only": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "get all example data",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "examples"
+                ],
+                "summary": "Get Example With Auth",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/common.BaseResponse-dto_ExampleDTO"
+                        }
+                    }
+                }
+            }
+        },
         "/examples/auth": {
             "get": {
                 "security": [
@@ -399,6 +427,47 @@ const docTemplate = `{
                     }
                 }
             }
+        },
+        "/users/{uuid}/roles": {
+            "put": {
+                "description": "update a role of user",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "users"
+                ],
+                "summary": "Update User Role",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "UUID",
+                        "name": "uuid",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "request body for update a role of user [RAW]",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.UpdateUserRole"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/common.BaseResponse-dto_UserDTO"
+                        }
+                    }
+                }
+            }
         }
     },
     "definitions": {
@@ -533,6 +602,14 @@ const docTemplate = `{
                 "username": {
                     "type": "string",
                     "example": "Budi Pambudi"
+                }
+            }
+        },
+        "dto.UpdateUserRole": {
+            "type": "object",
+            "properties": {
+                "role_id": {
+                    "type": "string"
                 }
             }
         },
