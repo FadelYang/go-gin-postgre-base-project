@@ -17,7 +17,7 @@ func RegisterRoutes(rg *gin.RouterGroup, exProvider *providers.Provider, jwtServ
 		"/admin-superadmin-only",
 		middleware.AuthMiddleware(*jwtService),
 		middleware.RBACMiddleware(*jwtService, []string{"superadmin", "admin"}),
-		exProvider.ExHandler.GetExampleWithAuth,
+		exProvider.ExHandler.GetExampleOnlyForAdminAndSuperAdmin,
 	)
 	exRoutes.POST("", exProvider.ExHandler.Create)
 }

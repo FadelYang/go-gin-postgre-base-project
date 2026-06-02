@@ -56,6 +56,7 @@ func (s *JWTService) GenerateAccessToken(payload model.GenerateTokenPayload) (st
 
 	claims := dto.AccessTokenClaim{
 		UserID: payload.UserID,
+		Role:   payload.Role,
 		RegisteredClaims: jwt.RegisteredClaims{
 			ID:        jti,
 			ExpiresAt: jwt.NewNumericDate(time.Now().Add(1 * 15 * time.Minute)),
@@ -78,6 +79,7 @@ func (s *JWTService) GenerateRefreshToken(payload model.GenerateTokenPayload) (s
 
 	claims := dto.RefreshTokenClaim{
 		UserID:    payload.UserID,
+		Role:      payload.Role,
 		SessionID: payload.SessionID,
 		Version:   payload.Version,
 		Type:      "refresh",

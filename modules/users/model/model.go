@@ -19,5 +19,6 @@ type User struct {
 	CreatedAt    time.Time `gorm:"autoCreateTime"`
 	UpdatedAt    time.Time `gorm:"autoUpdateTime"`
 
-	Roles roleModel.Roles `gorm:"roles"`
+	RoleID uuid.UUID       `gorm:"column:role_id"`
+	Role   roleModel.Roles `gorm:"foreignKey:RoleID;references:ID"`
 }

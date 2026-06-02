@@ -14,4 +14,5 @@ type GenerateTokenPayload struct {
 	UserID    uuid.UUID `json:"user_id"`
 	SessionID uuid.UUID `json:"session_id"`
 	Version   uint      `json:"version"`
+	Role      string    `json:"role"`
 }

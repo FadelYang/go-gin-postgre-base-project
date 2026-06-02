@@ -83,7 +83,10 @@ func (r *userRepository) FindByID(ctx context.Context, id uuid.UUID) (model.User
 
 func (r *userRepository) FindByEmail(ctx context.Context, email string) (model.User, error) {
 	var user model.User
-	if err := r.db.WithContext(ctx).First(&user, "email = ?", email).Error; err != nil {
+	if err := r.db.WithContext(ctx).
+		Preload("Role").
+		First(&user, "email = ?", email).
+		Error; err != nil {
 		return model.User{}, err
 	}
 
@@ -92,7 +95,10 @@ func (r *userRepository) FindByEmail(ctx context.Context, email string) (model.U
 
 func (r *userRepository) FindByUsername(ctx context.Context, username string) (model.User, error) {
 	var user model.User
-	if err := r.db.WithContext(ctx).First(&user, "username = ?", username).Error; err != nil {
+	if err := r.db.WithContext(ctx).
+		Preload("Role").
+		First(&user, "username = ?", username).
+		Error; err != nil {
 		return model.User{}, err
 	}
 
@@ -101,7 +107,10 @@ func (r *userRepository) FindByUsername(ctx context.Context, username string) (m
 
 func (r *userRepository) FindByPhonenumber(ctx context.Context, phonenumber string) (model.User, error) {
 	var user model.User
-	if err := r.db.WithContext(ctx).First(&user, "phonenumber = ?", phonenumber).Error; err != nil {
+	if err := r.db.WithContext(ctx).
+		Preload("Role").
+		First(&user, "phonenumber = ?", phonenumber).
+		Error; err != nil {
 		return model.User{}, err
 	}
 
