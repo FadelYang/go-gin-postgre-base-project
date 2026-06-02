@@ -13,5 +13,11 @@ func RegisterRoutes(rg *gin.RouterGroup, exProvider *providers.Provider, jwtServ
 
 	exRoutes.GET("", exProvider.ExHandler.GetExamples)
 	exRoutes.GET("/auth", middleware.AuthMiddleware(*jwtService), exProvider.ExHandler.GetExampleWithAuth)
+	exRoutes.GET(
+		"/admin-superadmin-only",
+		middleware.AuthMiddleware(*jwtService),
+		middleware.RBACMiddleware(*jwtService, []string{"superadmin", "admin"}),
+		exProvider.ExHandler.GetExampleWithAuth,
+	)
 	exRoutes.POST("", exProvider.ExHandler.Create)
 }

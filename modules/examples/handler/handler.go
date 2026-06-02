@@ -73,6 +73,25 @@ func (c *ExampleHandler) GetExampleWithAuth(ctx *gin.Context) {
 }
 
 // @Tags 					examples
+// @Summary				Get Example With Auth
+// @Description 	get all example data
+// @Accept 				json
+// @Produce 			json
+// @Security 			BearerAuth
+// @Success				200 {object} common.BaseResponse[dto.ExampleDTO]
+// @Router				/examples/admin-superadmin-only [get]
+func (c *ExampleHandler) GetExampleOnlyForAdminAndSuperAdmin(ctx *gin.Context) {
+	ctx.JSON(
+		http.StatusOK,
+		common.BaseResponse[any]{
+			Status:  http.StatusOK,
+			Message: "success get example for admin and superadmin",
+			Data:    nil,
+		},
+	)
+}
+
+// @Tags 					examples
 // @Summary				Post Example
 // @Description 	create an example
 // @Accept 				json
