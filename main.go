@@ -37,7 +37,7 @@ func main() {
 	r := gin.Default()
 	routes.InitRoutes(r, p, jwtService)
 
-	port := 8000
+	port := os.Getenv("PORT")
 	fmt.Printf("Server running at port %d\n", port)
 	r.Run(fmt.Sprintf(":%d", port))
 }
