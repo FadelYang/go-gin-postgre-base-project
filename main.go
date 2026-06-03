@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"log"
 	"os"
 	"project-root/config"
 	"project-root/internal/services"
@@ -38,6 +39,11 @@ func main() {
 	routes.InitRoutes(r, p, jwtService)
 
 	port := os.Getenv("PORT")
-	fmt.Printf("Server running at port %d\n", port)
-	r.Run(fmt.Sprintf(":%d", port))
+
+	fmt.Printf("Server running at port %s\n", port)
+
+	err := r.Run(":" + port)
+	if err != nil {
+		log.Fatal(err)
+	}
 }
